@@ -70,3 +70,16 @@
   .center-detail { font-size:14px; }
   .status-pill { font-size:12px; padding:6px 12px; letter-spacing:0.6px; }
 }
+
+/* ============================================================
+   Host-page defence. The home page sets text-align:center on its
+   sections, and both blocks inherit it — the hours detail line and
+   every Option C row drift to the middle. Pin them left wherever
+   they are dropped.
+   ============================================================ */
+.hours-list, .hours-list *, .month-stack, .month-stack * { text-align: left; }
+
+/* Opt-in centring. Put class "sc-center" on the wrapper that holds the block
+   when it sits in a full-width section (the home page). The schedule page
+   leaves it off, so its two columns stay flush left as before. */
+.sc-center .hours-list, .sc-center .month-stack { margin-left:auto; margin-right:auto; }
