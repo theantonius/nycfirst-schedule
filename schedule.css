@@ -1,0 +1,72 @@
+/* keep the raw Webflow output out of sight */
+.hours-data, .row-center, .row-date, .row-enddate { display:none; }
+.month-label { display:none; }
+
+.month-stack { display:flex; flex-direction:column; gap:16px; max-width:680px; }
+
+.month-card { background:#fff; border:1px solid #D3D1C7; border-radius:12px;
+  padding:4px 20px 8px 20px; }
+
+.month-head { font-size:16px; font-weight:500; color:#2C2C2A; letter-spacing:0;
+  padding-top:14px; padding-bottom:8px; }
+
+/* ---- Option C row ---- */
+.c-row { display:flex; flex-direction:row; gap:17px; align-items:stretch;
+  padding-top:14px; padding-bottom:14px; border-top:1px solid #D3D1C7; }
+
+.c-stripe { flex:0 0 4px; width:4px; border-radius:999px; background:#9AA0A6; }
+.c-row.is-event  .c-stripe { background:#1D6FD0; }
+.c-row.is-closed .c-stripe { background:#D92D20; }
+.c-row.is-alt    .c-stripe { background:#F5C542; }
+
+.c-body { display:flex; flex-direction:column; gap:3px; flex:1 1 auto; min-width:0; }
+
+.c-top { display:flex; flex-direction:row; gap:8px; align-items:flex-start;
+  justify-content:space-between; }
+
+.c-when { font-size:13px; font-weight:700; letter-spacing:0.6px; color:#5F5E5A;
+  text-transform:uppercase; line-height:1.3; }
+
+.c-pill { flex:0 0 auto; white-space:nowrap; font-size:12px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.6px; line-height:1.2;
+  border-radius:999px; padding:5px 12px; color:#fff; background:#9AA0A6; }
+.c-row.is-event  .c-pill { background:#1D6FD0; color:#fff; }
+.c-row.is-closed .c-pill { background:#D92D20; color:#fff; }
+.c-row.is-alt    .c-pill { background:#F5C542; color:#1A1A1A; }
+
+.c-name { font-size:16px; font-weight:500; color:#2C2C2A; }
+.c-loc  { font-size:14px; font-weight:400; color:#5F5E5A; }
+.c-desc { font-size:14px; font-weight:400; color:#5F5E5A; line-height:1.6; }
+.c-reg  { font-size:14px; font-weight:500; color:#1D6FD0; text-decoration:underline;
+  margin-top:4px; align-self:flex-start; }
+
+@media (max-width:479px) {
+  .c-row { gap:12px; }
+  .c-when { font-size:12px; }
+  .c-top { flex-direction:column; gap:6px; }
+}
+
+/* ============================================================
+   TODAY'S HOURS — unchanged from the previous build.
+   The second script depends on every rule below. Do not drop it.
+   ============================================================ */
+.status-pill { display:inline-block; flex:0 0 auto; white-space:nowrap;
+  font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
+  line-height:1.2; border-radius:999px; padding:7px 16px; }
+.status-pill.is-closed  { background:#D92D20; color:#fff; }
+.status-pill.is-alt     { background:#F5C542; color:#1A1A1A; }
+.status-pill.is-event   { background:#1D6FD0; color:#fff; }
+.status-pill.is-open    { background:#0A8A43; color:#fff; }
+.status-pill.is-special { background:#6B7280; color:#fff; }
+
+.hours-list { display:flex; flex-direction:column; gap:12px; max-width:680px; }
+.center-card { background:#fff; border:1px solid #D3D1C7; border-radius:12px; padding:16px 20px; }
+.center-card-top { display:flex; flex-direction:row; gap:12px; align-items:center; justify-content:space-between; }
+.center-name-today { font-size:18px; font-weight:500; color:#2C2C2A; }
+.center-detail { font-size:15px; font-weight:400; color:#5F5E5A; line-height:1.5; }
+
+@media (max-width:479px) {
+  .center-name-today { font-size:16px; }
+  .center-detail { font-size:14px; }
+  .status-pill { font-size:12px; padding:6px 12px; letter-spacing:0.6px; }
+}
