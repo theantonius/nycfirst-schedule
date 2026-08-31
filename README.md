@@ -30,10 +30,18 @@ API calls, no keys, and nothing here talks to any internal system.
 
 ## Editing
 
-Change the file, commit, push. GitHub Pages redeploys in about a minute.
+Change a file, then run:
 
-The pages load these files with a `?v=` query string. Bump it after a push, or
-browsers will keep the cached copy for roughly ten minutes.
+```
+./deploy.sh "what changed"
+```
+
+That commits, pushes, clears the CDN cache and verifies that the new file is
+actually being served. If it reports STALE, wait a minute and run it again —
+the push has already succeeded either way.
+
+The site loads these files from a CDN that mirrors this repository, so nothing
+needs to be uploaded or pasted anywhere.
 
 ## Notes
 
