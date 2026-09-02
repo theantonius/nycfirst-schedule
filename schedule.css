@@ -103,8 +103,11 @@
 .sc-chip.is-closed[aria-pressed="true"] { background:#D92D20; }
 .sc-chip.is-alt[aria-pressed="true"]    { background:#F5C542; color:#1A1A1A; }
 
+/* Fixed width, or the control resizes to whichever centre is selected and
+   drags the item count across the bar with it. */
 .sc-select { font:inherit; font-size:14px; padding:8px 12px; border-radius:8px;
-  border:1px solid #D3D1C7; background:#fff; color:#2C2C2A; }
+  border:1px solid #D3D1C7; background:#fff; color:#2C2C2A;
+  width:220px; max-width:100%; }
 
 .sc-count { font-size:13px; color:#888780; margin-left:auto; }
 
@@ -124,3 +127,31 @@
 .sc-panel { background:#F7F6F3; border:1px solid #D3D1C7; border-radius:16px;
   padding:24px; }
 @media (max-width:479px) { .sc-panel { padding:16px; border-radius:12px; } }
+
+/* ---- teaser section: one panel, centred, off the screen edges ---- */
+.sc-teaser { grid-template-columns:1fr; max-width:1160px;
+  margin-left:auto; margin-right:auto; }
+.sc-teaser .sc-keep { width:100%; }
+@media (max-width:991px) { .sc-teaser { max-width:none; margin-left:16px; margin-right:16px; } }
+
+/* ============================================================
+   Program tags. Colours match the Programs collection in Webflow;
+   an unrecognised code falls back to neutral grey so adding a
+   program on the Monday board needs no code change.
+   ============================================================ */
+.c-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+
+.c-tag { font-size:11px; font-weight:700; letter-spacing:0.6px; line-height:1;
+  text-transform:uppercase; padding:5px 9px; border-radius:6px;
+  background:#EDECE8; color:#5F5E5A; }
+.c-tag.prog-fll { background:#00A651; color:#fff; }
+.c-tag.prog-ftc { background:#F57E03; color:#fff; }
+.c-tag.prog-frc { background:#009CD7; color:#fff; }
+
+/* program chips in the filter bar — outlined until selected, then filled
+   in the same colour as the row tags */
+.sc-chips-prog { display:flex; flex-wrap:wrap; gap:8px; }
+.sc-chip.is-prog[aria-pressed="true"] { background:#5F5E5A; color:#fff; }
+.sc-chip.is-prog.prog-fll[aria-pressed="true"] { background:#00A651; color:#fff; }
+.sc-chip.is-prog.prog-ftc[aria-pressed="true"] { background:#F57E03; color:#fff; }
+.sc-chip.is-prog.prog-frc[aria-pressed="true"] { background:#009CD7; color:#fff; }

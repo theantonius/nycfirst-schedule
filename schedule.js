@@ -92,6 +92,14 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     var name    = txt(bodies[0]);
     var desc    = txt(bodies[1]);
+    // Programs arrive as a delimited list of short codes, e.g. "FLL|FTC".
+    // Monday's dropdown hands us comma-separated labels, so accept either.
+    // These codes ARE the keys: rename a label on the board and the mapping
+    // breaks, which is why they stay short.
+    var programs = txt(row.querySelector('.row-programs'))
+      .split(/[|,]/)
+      .map(function (s) { return s.trim().toUpperCase(); })
+      .filter(Boolean);
     var regEl   = row.querySelector('.row-reglink');
 
     if (teaser) {
@@ -138,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var el = document.createElement('div');
     el.className = 'c-row is-' + type;
     el.setAttribute('data-type', type);
+    if (programs.length) el.setAttribute('data-programs', programs.join('|'));
     if (centre) el.setAttribute('data-center', centre);
 
     var stripe = document.createElement('span');
@@ -164,6 +173,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (name)   { var n = document.createElement('div'); n.className = 'c-name'; n.textContent = name;   body.appendChild(n); }
     if (centre) { var c = document.createElement('div'); c.className = 'c-loc';  c.textContent = centre; body.appendChild(c); }
+
+    if (programs.length) {
+      var tags = document.createElement('div');
+      tags.className = 'c-tags';
+      programs.forEach(function (pr) {
+        var tag = document.createElement('span');
+        // unknown codes still render, just in the neutral colour, so adding a
+        // programme on the board needs no code change
+        tag.className = 'c-tag prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        tag.textContent = pr;
+        tags.appendChild(tag);
+      });
+      body.appendChild(tags);
+    }
     if (desc)   { var d = document.createElement('div'); d.className = 'c-desc'; d.textContent = desc;   body.appendChild(d); }
 
     if (regEl && regEl.getAttribute('href')) {
@@ -189,13 +212,17 @@ document.addEventListener('DOMContentLoaded', function () {
   if (host) {
     var allRows = [].slice.call(stack.querySelectorAll('.c-row'));
     var TYPE_LABEL = { event: 'Events', closed: 'Closures', alt: 'Alt hours' };
-    var typesPresent = [], centresPresent = [];
+    var typesPresent = [], centresPresent = [], programsPresent = [];
 
     allRows.forEach(function (r) {
       var ty = r.getAttribute('data-type'), ce = r.getAttribute('data-center');
       if (ty && typesPresent.indexOf(ty) < 0) typesPresent.push(ty);
       if (ce && centresPresent.indexOf(ce) < 0) centresPresent.push(ce);
+      (r.getAttribute('data-programs') || '').split('|').forEach(function (pr) {
+        if (pr && programsPresent.indexOf(pr) < 0) programsPresent.push(pr);
+      });
     });
+    programsPresent.sort();
     centresPresent.sort();
 
     var bar = document.createElement('div');
@@ -216,6 +243,22 @@ document.addEventListener('DOMContentLoaded', function () {
       chipWrap.appendChild(b2);
     });
     bar.appendChild(chipWrap);
+
+    var progWrap = null;
+    if (programsPresent.length) {
+      progWrap = document.createElement('div');
+      progWrap.className = 'sc-chips sc-chips-prog';
+      programsPresent.forEach(function (pr) {
+        var b3 = document.createElement('button');
+        b3.type = 'button';
+        b3.className = 'sc-chip is-prog prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        b3.setAttribute('data-prog', pr);
+        b3.setAttribute('aria-pressed', 'false');
+        b3.textContent = pr;
+        progWrap.appendChild(b3);
+      });
+      bar.appendChild(progWrap);
+    }
 
     var sel = document.createElement('select');
     sel.className = 'sc-select';
@@ -244,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
     stack.parentNode.insertBefore(bar, stack);
     stack.parentNode.insertBefore(none, stack.nextSibling);
 
-    var active = [];   // empty means no type filter, i.e. show all
+    var active = [], activeProg = [];   // empty means no filter on that axis
 
     function apply() {
       var centre = sel.value, shown = 0;
@@ -252,7 +295,12 @@ document.addEventListener('DOMContentLoaded', function () {
       allRows.forEach(function (r) {
         var okType = !active.length || active.indexOf(r.getAttribute('data-type')) > -1;
         var okCentre = !centre || r.getAttribute('data-center') === centre;
-        var show = okType && okCentre;
+        // a row matches if it carries ANY of the selected programmes
+        var rowProgs = (r.getAttribute('data-programs') || '').split('|');
+        var okProg = !activeProg.length || activeProg.some(function (pr) {
+          return rowProgs.indexOf(pr) > -1;
+        });
+        var show = okType && okCentre && okProg;
         r.style.display = show ? '' : 'none';
         if (show) shown++;
       });
@@ -271,22 +319,47 @@ document.addEventListener('DOMContentLoaded', function () {
       none.hidden = (shown !== 0);
     }
 
-    chipWrap.addEventListener('click', function (e) {
+    function toggle(list, value, el) {
+      var i = list.indexOf(value);
+      if (i > -1) { list.splice(i, 1); el.setAttribute('aria-pressed', 'false'); }
+      else { list.push(value); el.setAttribute('aria-pressed', 'true'); }
+      apply();
+    }
+
+    bar.addEventListener('click', function (e) {
       var hit = e.target.closest ? e.target.closest('.sc-chip') : null;
       if (!hit) return;
-      var ty = hit.getAttribute('data-type'), i = active.indexOf(ty);
-      if (i > -1) {
-        active.splice(i, 1);
-        hit.setAttribute('aria-pressed', 'false');
-      } else {
-        active.push(ty);
-        hit.setAttribute('aria-pressed', 'true');
-      }
-      apply();
+      if (hit.hasAttribute('data-prog')) toggle(activeProg, hit.getAttribute('data-prog'), hit);
+      else toggle(active, hit.getAttribute('data-type'), hit);
     });
 
     sel.addEventListener('change', apply);
     apply();
+  }
+
+
+  // ---------- teaser layout ----------
+  // The home page section was built as two grid columns, but the left one only
+  // holds a subtitle, so it rendered as a tall empty white box with a sliver of
+  // the background photo showing through the gap. Fold whatever is in the other
+  // columns into the panel that holds the list, then remove the emptied ones.
+  // Content is MOVED, never discarded. CSS collapses the grid to one column.
+  if (teaser) {
+    var grid = list.closest && list.closest('.sc-teaser');
+    var keep = grid && [].slice.call(grid.children).filter(function (c) {
+      return c.contains(list);
+    })[0];
+
+    if (grid && keep) {
+      keep.classList.add('sc-keep');
+      [].slice.call(grid.children).forEach(function (col) {
+        if (col === keep) return;
+        var frag = document.createDocumentFragment();
+        while (col.firstChild) frag.appendChild(col.firstChild);
+        keep.insertBefore(frag, keep.firstChild);   // fragment preserves order
+        col.parentNode.removeChild(col);
+      });
+    }
   }
 
   list.style.display = 'none';
