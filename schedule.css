@@ -83,3 +83,44 @@
    when it sits in a full-width section (the home page). The schedule page
    leaves it off, so its two columns stay flush left as before. */
 .sc-center .hours-list, .sc-center .month-stack { margin-left:auto; margin-right:auto; }
+
+/* ============================================================
+   Filter bar. Only rendered when the Upcoming wrapper carries
+   .sc-filters — the events page, not the home page teaser.
+   ============================================================ */
+.sc-bar, .sc-bar * { text-align:left; }
+.sc-bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+  margin:0 0 16px 0; max-width:680px; }
+
+.sc-chips { display:flex; flex-wrap:wrap; gap:8px; }
+
+.sc-chip { font:inherit; font-size:13px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.6px; line-height:1; padding:8px 14px; border-radius:999px;
+  border:1px solid #D3D1C7; background:#fff; color:#5F5E5A; cursor:pointer; }
+.sc-chip:hover { border-color:#9AA0A6; }
+.sc-chip[aria-pressed="true"] { color:#fff; border-color:transparent; }
+.sc-chip.is-event[aria-pressed="true"]  { background:#1D6FD0; }
+.sc-chip.is-closed[aria-pressed="true"] { background:#D92D20; }
+.sc-chip.is-alt[aria-pressed="true"]    { background:#F5C542; color:#1A1A1A; }
+
+.sc-select { font:inherit; font-size:14px; padding:8px 12px; border-radius:8px;
+  border:1px solid #D3D1C7; background:#fff; color:#2C2C2A; }
+
+.sc-count { font-size:13px; color:#888780; margin-left:auto; }
+
+.sc-none { background:#F3F2EE; border:1px solid #D3D1C7; border-radius:12px;
+  padding:16px 20px; font-size:15px; color:#5F5E5A; max-width:680px; }
+
+@media (max-width:479px) {
+  .sc-count { margin-left:0; width:100%; }
+  .sc-chip { font-size:12px; padding:7px 12px; }
+}
+
+/* ---- teaser (home page): flat list, so no card wrapper to sit inside ---- */
+.month-stack > .c-row:first-child { border-top:0; padding-top:0; }
+
+/* Solid panel behind a column. Add class sc-panel in the Designer to whichever
+   column needs to stay legible over a photo. */
+.sc-panel { background:#F7F6F3; border:1px solid #D3D1C7; border-radius:16px;
+  padding:24px; }
+@media (max-width:479px) { .sc-panel { padding:16px; border-radius:12px; } }

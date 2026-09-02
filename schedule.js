@@ -57,6 +57,18 @@ document.addEventListener('DOMContentLoaded', function () {
     return when + ' · ' + tail;
   }
 
+  // ---------- teaser mode ----------
+  // Opt-in via .sc-teaser on the wrapper (the home page). Shows only what
+  // starts inside the window, capped, as a flat list with no month headings.
+  // The Collection List itself must stay UNLIMITED: the Today's Hours script
+  // reads every announcement row to find closures, so trimming the list in
+  // Webflow would silently stop a closure from overriding a centre's hours.
+  var TEASER_DAYS = 30, TEASER_MAX = 5;
+  var teaser = !!(list.closest && list.closest('.sc-teaser'));
+  var today0 = new Date(); today0.setHours(0, 0, 0, 0);
+  var horizon = new Date(today0.getTime() + TEASER_DAYS * 86400000);
+  var teaserShown = 0;
+
   var stack = document.createElement('div');
   stack.className = 'month-stack';
   list.parentNode.insertBefore(stack, list);
@@ -82,6 +94,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var desc    = txt(bodies[1]);
     var regEl   = row.querySelector('.row-reglink');
 
+    if (teaser) {
+      if (!start) return;
+      var last = end || start;
+      if (last < today0) return;              // already finished
+      if (start > horizon) return;            // past the window
+      if (teaserShown >= TEASER_MAX) return;  // rows arrive date-sorted
+      teaserShown++;
+    }
+
     var pillClosed = row.querySelector('.status-pill.is-closed');
     var pillAlt    = row.querySelector('.status-pill.is-alt');
     var pillEvent  = row.querySelector('.status-pill.is-event');
@@ -100,7 +121,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (type !== 'closed' && /\d/.test(hours) === false) hours = '';
 
     // ---- month card ----
-    if (month !== seenMonth) {
+    if (teaser) {
+      card = stack;
+    } else if (month !== seenMonth) {
       card = document.createElement('div');
       card.className = 'month-card';
       var h = document.createElement('div');
@@ -114,6 +137,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---- build the Option C row ----
     var el = document.createElement('div');
     el.className = 'c-row is-' + type;
+    el.setAttribute('data-type', type);
+    if (centre) el.setAttribute('data-center', centre);
 
     var stripe = document.createElement('span');
     stripe.className = 'c-stripe';
@@ -154,6 +179,115 @@ document.addEventListener('DOMContentLoaded', function () {
     el.appendChild(body);
     card.appendChild(el);
   });
+
+
+  // ---------- filters ----------
+  // Opt-in. Only a page whose Upcoming wrapper carries .sc-filters gets a bar,
+  // so forgetting the class leaves the previous behaviour untouched rather
+  // than putting chips on a three-row teaser.
+  var host = list.closest && list.closest('.sc-filters');
+  if (host) {
+    var allRows = [].slice.call(stack.querySelectorAll('.c-row'));
+    var TYPE_LABEL = { event: 'Events', closed: 'Closures', alt: 'Alt hours' };
+    var typesPresent = [], centresPresent = [];
+
+    allRows.forEach(function (r) {
+      var ty = r.getAttribute('data-type'), ce = r.getAttribute('data-center');
+      if (ty && typesPresent.indexOf(ty) < 0) typesPresent.push(ty);
+      if (ce && centresPresent.indexOf(ce) < 0) centresPresent.push(ce);
+    });
+    centresPresent.sort();
+
+    var bar = document.createElement('div');
+    bar.className = 'sc-bar';
+
+    // chips are built from what is actually on the page, so a type with no
+    // items never offers a filter that returns nothing
+    var chipWrap = document.createElement('div');
+    chipWrap.className = 'sc-chips';
+    ['event', 'closed', 'alt'].forEach(function (ty) {
+      if (typesPresent.indexOf(ty) < 0) return;
+      var b2 = document.createElement('button');
+      b2.type = 'button';
+      b2.className = 'sc-chip is-' + ty;
+      b2.setAttribute('data-type', ty);
+      b2.setAttribute('aria-pressed', 'false');
+      b2.textContent = TYPE_LABEL[ty];
+      chipWrap.appendChild(b2);
+    });
+    bar.appendChild(chipWrap);
+
+    var sel = document.createElement('select');
+    sel.className = 'sc-select';
+    sel.setAttribute('aria-label', 'Filter by STEM Center');
+    var opt0 = document.createElement('option');
+    opt0.value = '';
+    opt0.textContent = 'All centers';
+    sel.appendChild(opt0);
+    centresPresent.forEach(function (ce) {
+      var o = document.createElement('option');
+      o.value = ce;
+      o.textContent = ce;
+      sel.appendChild(o);
+    });
+    bar.appendChild(sel);
+
+    var count = document.createElement('div');
+    count.className = 'sc-count';
+    bar.appendChild(count);
+
+    var none = document.createElement('div');
+    none.className = 'sc-none';
+    none.textContent = 'Nothing matches those filters.';
+    none.hidden = true;
+
+    stack.parentNode.insertBefore(bar, stack);
+    stack.parentNode.insertBefore(none, stack.nextSibling);
+
+    var active = [];   // empty means no type filter, i.e. show all
+
+    function apply() {
+      var centre = sel.value, shown = 0;
+
+      allRows.forEach(function (r) {
+        var okType = !active.length || active.indexOf(r.getAttribute('data-type')) > -1;
+        var okCentre = !centre || r.getAttribute('data-center') === centre;
+        var show = okType && okCentre;
+        r.style.display = show ? '' : 'none';
+        if (show) shown++;
+      });
+
+      // a month card with nothing left in it is noise
+      [].slice.call(stack.querySelectorAll('.month-card')).forEach(function (card) {
+        var any = [].slice.call(card.querySelectorAll('.c-row')).some(function (r) {
+          return r.style.display !== 'none';
+        });
+        card.style.display = any ? '' : 'none';
+      });
+
+      count.textContent = (shown === allRows.length)
+        ? shown + (shown === 1 ? ' item' : ' items')
+        : 'Showing ' + shown + ' of ' + allRows.length;
+      none.hidden = (shown !== 0);
+    }
+
+    chipWrap.addEventListener('click', function (e) {
+      var hit = e.target.closest ? e.target.closest('.sc-chip') : null;
+      if (!hit) return;
+      var ty = hit.getAttribute('data-type'), i = active.indexOf(ty);
+      if (i > -1) {
+        active.splice(i, 1);
+        hit.setAttribute('aria-pressed', 'false');
+      } else {
+        active.push(ty);
+        hit.setAttribute('aria-pressed', 'true');
+      }
+      apply();
+    });
+
+    sel.addEventListener('change', apply);
+    apply();
+  }
 
   list.style.display = 'none';
 });
@@ -375,3 +509,13 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+// Today's Hours works out closures by reading the Upcoming rows. A page with
+// the hours block but no announcement rows will quietly show normal hours for
+// a closed centre, which is worse than an error. Say so in the console.
+document.addEventListener('DOMContentLoaded', function () {
+  if (document.querySelector('.hours-list') && !document.querySelector('.announce-row')) {
+    console.warn('[schedule] Today\'s Hours is on this page but the announcements '
+      + 'Collection List is not. Closures and alternate hours will NOT override '
+      + 'the regular hours. Add the announcements list to this page.');
+  }
+});
