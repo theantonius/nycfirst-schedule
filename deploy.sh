@@ -9,6 +9,12 @@ MSG="${1:-Update schedule files}"
 
 cd "$(dirname "$0")"
 
+# Stamp the build date into both files so a page can report its own version.
+STAMP="$(date '+%Y-%m-%d %H:%M')"
+sed -i '' -E "s|^var SCHEDULE_BUILD = '.*';|var SCHEDULE_BUILD = '${STAMP}';|" schedule.js
+sed -i '' -E "s|^/\* schedule build: .* \*/|/* schedule build: ${STAMP} */|" schedule.css
+echo "stamped build ${STAMP}"
+
 if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
   git commit -m "$MSG"
