@@ -11,8 +11,11 @@ cd "$(dirname "$0")"
 
 # Stamp the build date into both files so a page can report its own version.
 STAMP="$(date '+%Y-%m-%d %H:%M')"
-sed -i '' -E "s|^var SCHEDULE_BUILD = '.*';|var SCHEDULE_BUILD = '${STAMP}';|" schedule.js
-sed -i '' -E "s|^/\* schedule build: .* \*/|/* schedule build: ${STAMP} */|" schedule.css
+# GNU sed wants -i with no argument, BSD/macOS sed wants -i ''. Pick at runtime
+# so this script works from a Mac terminal and from a Linux shell alike.
+sedi() { if sed --version >/dev/null 2>&1; then sed -i "$@"; else sed -i '' "$@"; fi; }
+sedi -E "s|^var SCHEDULE_BUILD = '.*';|var SCHEDULE_BUILD = '${STAMP}';|" schedule.js
+sedi -E "s|^/\* schedule build: .* \*/|/* schedule build: ${STAMP} */|" schedule.css
 echo "stamped build ${STAMP}"
 
 if [[ -n "$(git status --porcelain)" ]]; then

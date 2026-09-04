@@ -1,6 +1,6 @@
-/* schedule build: 2026-09-02 13:05 */
+/* schedule build: 2026-09-04 12:17 */
 /* keep the raw Webflow output out of sight */
-.hours-data, .row-center, .row-date, .row-enddate { display:none; }
+.hours-data, .row-center, .row-date, .row-enddate, .row-programs { display:none; }
 .month-label { display:none; }
 
 .month-stack { display:flex; flex-direction:column; gap:16px; max-width:680px; }
@@ -110,7 +110,10 @@
   border:1px solid #D3D1C7; background:#fff; color:#2C2C2A;
   width:220px; max-width:100%; }
 
-.sc-count { font-size:13px; color:#888780; margin-left:auto; }
+/* Reserved width, right aligned. The text length changes as rows filter, and
+   without a floor the bar jitters or wraps. */
+.sc-count { font-size:13px; color:#888780; margin-left:auto;
+  min-width:120px; text-align:right; white-space:nowrap; }
 
 .sc-none { background:#F3F2EE; border:1px solid #D3D1C7; border-radius:12px;
   padding:16px 20px; font-size:15px; color:#5F5E5A; max-width:680px; }

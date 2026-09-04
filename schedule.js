@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-02 13:05';
+var SCHEDULE_BUILD = '2026-09-04 12:17';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -318,9 +318,9 @@ document.addEventListener('DOMContentLoaded', function () {
         card.style.display = any ? '' : 'none';
       });
 
-      count.textContent = (shown === allRows.length)
-        ? shown + (shown === 1 ? ' item' : ' items')
-        : 'Showing ' + shown + ' of ' + allRows.length;
+      // One constant phrasing. Switching between "4 items" and "Showing 1 of 4"
+      // changed the width of this element, which reflowed the whole bar.
+      count.textContent = 'Showing ' + shown + ' of ' + allRows.length;
       none.hidden = (shown !== 0);
     }
 
