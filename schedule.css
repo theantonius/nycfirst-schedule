@@ -1,6 +1,6 @@
-/* schedule build: 2026-09-04 12:17 */
+/* schedule build: 2026-09-04 12:28 */
 /* keep the raw Webflow output out of sight */
-.hours-data, .row-center, .row-date, .row-enddate, .row-programs { display:none; }
+.hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program { display:none; }
 .month-label { display:none; }
 
 .month-stack { display:flex; flex-direction:column; gap:16px; max-width:680px; }

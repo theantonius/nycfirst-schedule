@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-04 12:17';
+var SCHEDULE_BUILD = '2026-09-04 12:28';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Monday's dropdown hands us comma-separated labels, so accept either.
     // These codes ARE the keys: rename a label on the board and the mapping
     // breaks, which is why they stay short.
-    var programs = txt(row.querySelector('.row-programs'))
+    var programs = txt(row.querySelector('.row-programs, .row-program'))
       .split(/[|,]/)
       .map(function (s) { return s.trim().toUpperCase(); })
       .filter(Boolean);
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var host = list.closest && list.closest('.sc-filters');
   if (host) {
     var allRows = [].slice.call(stack.querySelectorAll('.c-row'));
-    var TYPE_LABEL = { event: 'Events', closed: 'Closures', alt: 'Alt hours' };
+    var TYPE_LABEL = { event: 'All Events', closed: 'Closures', alt: 'Alt Hours' };
     var typesPresent = [], centresPresent = [], programsPresent = [];
 
     allRows.forEach(function (r) {
