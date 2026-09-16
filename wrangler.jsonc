@@ -1,8 +1,6 @@
 {
-  // Serves the repo's static files. No code, no build step.
+  // Cloudflare Pages project config. deploy.sh builds .cfbuild/ with only
+  // schedule.css and schedule.js, and publishes that folder.
   "name": "nycfirst-schedule",
-  "compatibility_date": "2026-09-16",
-  "assets": {
-    "directory": "./"
-  }
+  "pages_build_output_dir": ".cfbuild"
 }

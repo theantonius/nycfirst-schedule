@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# Commit, push, purge the CDN, then prove the new file is actually being served.
+# Commit, push, publish to Cloudflare Pages, then prove the new file is live.
 # Usage:  ./deploy.sh "what changed"
 set -euo pipefail
 
 REPO="theantonius/nycfirst-schedule"
+PROJECT="nycfirst-schedule"
+HOST="https://schedule.nycfirst.org"
+BUILD=".cfbuild"
 FILES=(schedule.css schedule.js)
 MSG="${1:-Update schedule files}"
 
@@ -22,24 +25,31 @@ if [[ -n "$(git status --porcelain)" ]]; then
   git add -A
   git commit -m "$MSG"
 else
-  echo "No local changes — purging and verifying anyway."
+  echo "No local changes — publishing anyway."
 fi
 
 git push
 
-# jsDelivr needs a moment to notice the new commit before a purge does any good.
+# Publish only the two files, never the repo.
+rm -rf "$BUILD"
+mkdir -p "$BUILD"
+cp "${FILES[@]}" "$BUILD/"
+npx wrangler pages deploy "$BUILD" --project-name "$PROJECT" --commit-dirty=true
+
+# ---- jsDelivr: still the live path until Webflow points at $HOST ----
+# DELETE THIS BLOCK once both Webflow pages load from schedule.nycfirst.org.
 echo "waiting for jsDelivr to see the commit..."
 sleep 6
-
 for f in "${FILES[@]}"; do
   curl -fsS "https://purge.jsdelivr.net/gh/${REPO}@main/${f}" >/dev/null && echo "purged  $f"
 done
+# ---------------------------------------------------------------------
 
 sleep 4
 
 fail=0
 for f in "${FILES[@]}"; do
-  live=$(curl -fsS "https://cdn.jsdelivr.net/gh/${REPO}@main/${f}" | wc -c | tr -d ' ')
+  live=$(curl -fsS "${HOST}/${f}" | wc -c | tr -d ' ')
   mine=$(wc -c < "$f" | tr -d ' ')
   if [[ "$live" == "$mine" ]]; then
     echo "OK      $f  ($live bytes live)"
@@ -51,7 +61,7 @@ done
 
 if [[ "$fail" == "1" ]]; then
   echo
-  echo "The CDN is still serving an old copy. Wait a minute and run ./deploy.sh again."
+  echo "Cloudflare is still serving an old copy. Wait a minute and run ./deploy.sh again."
   echo "Nothing is broken — the push already succeeded."
 else
   echo
