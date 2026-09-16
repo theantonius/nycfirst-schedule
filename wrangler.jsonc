@@ -1,0 +1,8 @@
+{
+  // Serves the repo's static files. No code, no build step.
+  "name": "nycfirst-schedule",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": "./"
+  }
+}
