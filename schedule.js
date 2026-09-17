@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-17 10:36';
+var SCHEDULE_BUILD = '2026-09-17 17:03';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -485,11 +485,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (visible(row.querySelector('.status-pill.is-event'))) return;
 
     var altPill = row.querySelector('.status-pill.is-alt');
-    var k = ckey(c.textContent) + '|' + d.textContent.trim();
-    if (overrides[k] && overrides[k].kind === 'closed') return;   // a closure outranks alt hours
-    overrides[k] = visible(altPill)
+    var entry = visible(altPill)
       ? { kind:'alt', label: altPill.textContent.trim() }
       : { kind:'closed' };
+
+    // A multi-day announcement covers every day in the span, not just the first.
+    // The end date is inclusive: 16 to 18 means all three days are affected.
+    var from = d.textContent.trim();
+    var e    = row.querySelector('.row-enddate');
+    var to   = e ? e.textContent.trim() : '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(to) || to < from) to = from;
+
+    for (var day = from, guard = 0; guard < 400; guard++) {
+      var k = ckey(c.textContent) + '|' + day;
+      // a closure outranks alt hours on the same day
+      if (!(overrides[k] && overrides[k].kind === 'closed')) overrides[k] = entry;
+      if (day === to) break;
+      day = isoPlus(day, 1);
+    }
   });
 
   function isoPlus(iso, n) {
