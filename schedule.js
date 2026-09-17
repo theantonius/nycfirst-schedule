@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-16 13:32';
+var SCHEDULE_BUILD = '2026-09-17 10:30';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -65,6 +65,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---------- teaser mode ----------
   // Opt-in via .sc-teaser on the wrapper (the home page). Shows only what
   // starts inside the window, capped, as a flat list with no month headings.
+  // Tag code -> full name, shown as a hover tooltip on the pill. Interim: this
+  // belongs in a Webflow Tags collection so adding a tag needs no deploy.
+  // Tooltips do not exist on touch devices.
+  var TAG_NAMES = {
+    'FLL': 'FIRST LEGO League',
+    'FTC': 'FIRST Tech Challenge',
+    'FRC': 'FIRST Robotics Competition',
+    'PD':  'Professional Development'
+  };
+
   // The Collection List itself must stay UNLIMITED: the Today's Hours script
   // reads every announcement row to find closures, so trimming the list in
   // Webflow would silently stop a closure from overriding a centre's hours.
@@ -188,6 +198,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // programme on the board needs no code change
         tag.className = 'c-tag prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         tag.textContent = pr;
+        // Full name on hover. An unlisted code simply gets no tooltip.
+        if (TAG_NAMES[pr]) tag.title = TAG_NAMES[pr];
         tags.appendChild(tag);
       });
       body.appendChild(tags);
@@ -383,9 +395,12 @@ document.addEventListener('DOMContentLoaded', function () {
     'cornell tech': 'CT',
     'andrew freedman home': 'AFH',
     'hudson yards': 'HY',
+    'manhattan: hudson yards': 'HY',
+    'manhattan': 'HY',
     'd13': 'D13',
     'school district 13': 'D13',
     'district 13 stem center': 'D13',
+    'district 13 brooklyn': 'D13',
     'qpl far rockaway': 'FR',
     'far rockaway': 'FR',
     'qpl jamaica central': 'JA',
@@ -406,7 +421,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Public-facing name overrides, keyed on the canonical abbreviation. Lets a card read
   // differently from the CMS item name without editing items we do not own.
   var DISPLAY = {
-    'D13': 'D13'
+    'D13': 'District 13 Brooklyn',
+    'HY':  'Manhattan: Hudson Yards'
   };
 
   // Public wording for the labels that are not clock hours, keyed on the CMS text
@@ -562,11 +578,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // An announced alt-hours day keeps the yellow pill all day, showing the actual hours.
     // Rare and important enough to outrank the pill-describes-right-now rule below.
     if (today.over) {
-      setPill('is-alt', today.label.toUpperCase());
+      // The pill names the situation; the hours themselves belong in the sentence,
+      // where they read as words rather than as a label.
+      setPill('is-alt', 'ALT HOURS');
+      var altRange = 'Alternate hours today: ' + fmt(today.start) + ' – ' + fmt(today.end);
       if (now.min >= today.start && now.min < today.end) {
-        detail.textContent = 'Open until ' + fmt(today.end) + ' · Special hours today.';
+        detail.textContent = 'Open now · ' + altRange + '.';
       } else if (now.min < today.start) {
-        detail.textContent = 'Closed now · Special hours today, opens ' + fmt(today.start) + '.';
+        detail.textContent = 'Closed now · ' + altRange + '.';
       } else {
         detail.textContent = 'Closed for the day · ' + nextOpenPhrase() + '.';
       }
