@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-18 11:54 */
+/* schedule build: 2026-09-18 15:12 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program { display:none; }
 .month-label { display:none; }
@@ -62,8 +62,11 @@
 
 .hours-list { display:flex; flex-direction:column; gap:12px; max-width:680px; }
 .center-card { background:#fff; border:1px solid #D3D1C7; border-radius:12px; padding:16px 20px; }
-.center-card-top { display:flex; flex-direction:row; gap:12px; align-items:center; justify-content:space-between; }
-.center-name-today { font-size:18px; font-weight:500; color:#2C2C2A; }
+/* align-items:flex-start, not center: a long centre name wraps to two lines and
+   the pill should stay level with the first one. min-width:0 lets the name wrap
+   at all — without it a flex child refuses to shrink and squashes the pill. */
+.center-card-top { display:flex; flex-direction:row; gap:12px; align-items:flex-start; justify-content:space-between; }
+.center-name-today { font-size:18px; font-weight:500; color:#2C2C2A; min-width:0; }
 .center-detail { font-size:15px; font-weight:400; color:#5F5E5A; line-height:1.5; }
 
 @media (max-width:479px) {
