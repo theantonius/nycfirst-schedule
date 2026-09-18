@@ -1,13 +1,16 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-18 10:39';
+var SCHEDULE_BUILD = '2026-09-18 10:42';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
   var list = document.querySelector('.announce-list');
-  if (!list) return;
-  var rows = [].slice.call(list.querySelectorAll('.announce-row'));
-  if (!rows.length) return;
+  var rows = list ? [].slice.call(list.querySelectorAll('.announce-row')) : [];
+
+  // Today's Hours gets its closures from the API, so it must still run on a page
+  // where the Upcoming list is absent or empty. Only the Upcoming rendering is
+  // skipped in that case.
+  var hasUpcoming = !!list && rows.length > 0;
 
   // Multi-day closures. The Figma spec writes "CLOSED ALL WEEK" for a Mon-Fri
   // span. A two-day closure is not a week, so the wording is chosen by length.
@@ -79,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // reads every announcement row to find closures, so trimming the list in
   // Webflow would silently stop a closure from overriding a centre's hours.
   var TEASER_DAYS = 30, TEASER_MAX = 5;
+  if (hasUpcoming) {
   var teaser = !!(list.closest && list.closest('.sc-teaser'));
   var today0 = new Date(); today0.setHours(0, 0, 0, 0);
   var horizon = new Date(today0.getTime() + TEASER_DAYS * 86400000);
@@ -385,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   list.style.display = 'none';
+  }   // end of the Upcoming block
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -580,7 +585,11 @@ document.addEventListener('DOMContentLoaded', function () {
         Object.keys(days).forEach(function (iso) {
           Object.keys(days[iso]).forEach(function (code) {
             var o = days[iso][code] || {};
-            overrides[ckey(code) + '|' + iso] = (o.kind === 'alt')
+            // The API already speaks canonical codes (CT, WH). Do NOT run them
+            // through ckey() — it lowercases anything not in ALIASES, and the
+            // cards look these up in upper case.
+            var key = String(code).trim().toUpperCase();
+            overrides[key + '|' + iso] = (o.kind === 'alt')
               ? { kind: 'alt', label: o.hours || '' }
               : { kind: 'closed' };
           });
