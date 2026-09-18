@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-18 10:04';
+var SCHEDULE_BUILD = '2026-09-18 10:39';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -117,10 +117,15 @@ document.addEventListener('DOMContentLoaded', function () {
       .filter(Boolean);
     var regEl   = row.querySelector('.row-reglink');
 
+    // Finished rows are dropped on EVERY page, not just the teaser. The CMS list
+    // is deliberately unfiltered — Today's Hours needs to see a closure that
+    // started before today — so the script decides what is still current, using
+    // the end date where there is one.
+    if (!start) return;
+    var last = end || start;
+    if (last < today0) return;                // already finished
+
     if (teaser) {
-      if (!start) return;
-      var last = end || start;
-      if (last < today0) return;              // already finished
       if (start > horizon) return;            // past the window
       if (teaserShown >= TEASER_MAX) return;  // rows arrive date-sorted
       teaserShown++;
@@ -499,6 +504,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function buildOverridesFromDom() {
   var hrsSource = document.querySelectorAll('.hrs-list .hrs-row');
 
   if (hrsSource.length) {
@@ -551,9 +557,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
   }
 
-  if (!hrsSource.length && document.querySelector('.hours-list')) {
-    console.warn('[schedule] Today\'s Hours is reading the Upcoming rows. Add the '
-      + 'unlimited .hrs-list collection list so a display limit cannot hide a closure.');
+  }
+
+  // Today's Hours reads its overrides from n8n, not from whatever the page
+  // happens to render. A collection list's limit, filter or sort can then never
+  // hide a closure — which is exactly how a live closure went missing before.
+  // The page rows are only a fallback for when the API cannot be reached.
+  var OVERRIDES_URL = 'https://n8n.nycfirst.org/webhook/sc-overrides';
+
+  function loadOverrides() {
+    if (!window.fetch || !window.Promise) {
+      buildOverridesFromDom();
+      return { then: function (f) { f(); } };
+    }
+    return fetch(OVERRIDES_URL, { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        var days = (data && data.days) || {};
+        Object.keys(days).forEach(function (iso) {
+          Object.keys(days[iso]).forEach(function (code) {
+            var o = days[iso][code] || {};
+            overrides[ckey(code) + '|' + iso] = (o.kind === 'alt')
+              ? { kind: 'alt', label: o.hours || '' }
+              : { kind: 'closed' };
+          });
+        });
+      })
+      .catch(function (e) {
+        console.warn('[schedule] overrides API unreachable, using the page rows instead.', e);
+        buildOverridesFromDom();
+      });
   }
 
   function isoPlus(iso, n) {
@@ -563,6 +599,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return dt.toISOString().slice(0,10);
   }
 
+  function renderHours() {
   var hoursList = document.querySelector('.hours-list');
   if (hoursList) {
     [].slice.call(hoursList.querySelectorAll('.center-card'))
@@ -668,6 +705,9 @@ document.addEventListener('DOMContentLoaded', function () {
       detail.textContent = 'Closed for the day · ' + nextOpenPhrase() + '.';
     }
   });
+  }
+
+  loadOverrides().then(renderHours);
 });
 
 // Today's Hours works out closures by reading the Upcoming rows. A page with
