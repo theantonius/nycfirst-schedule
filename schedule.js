@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-17 17:03';
+var SCHEDULE_BUILD = '2026-09-18 10:04';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -473,8 +473,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function visible(el) { return !!el && getComputedStyle(el).display !== 'none'; }
 
-  // Read today's announced changes off the rendered Upcoming rows.
+  // Where the overrides come from.
+  //
+  // Preferred: a dedicated, UNLIMITED collection list with class .hrs-list, whose
+  // items carry .hrs-center / .hrs-date / .hrs-enddate / .hrs-type / .hrs-hours.
+  // It exists so that how many rows the Upcoming block DISPLAYS can never change
+  // whether a closure applies — a capped Upcoming list used to silently drop
+  // closures and leave a centre showing normal hours.
+  //
+  // Falls back to the Upcoming rows when that list is not on the page.
   var overrides = {};
+
+  function addOverride(centerText, fromText, toText, entry) {
+    var from = String(fromText || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) return;
+    var to = String(toText || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(to) || to < from) to = from;
+
+    for (var day = from, guard = 0; guard < 400; guard++) {
+      var k = ckey(centerText) + '|' + day;
+      // a closure outranks alt hours on the same day
+      if (!(overrides[k] && overrides[k].kind === 'closed')) overrides[k] = entry;
+      if (day === to) break;
+      day = isoPlus(day, 1);
+    }
+  }
+
+  var hrsSource = document.querySelectorAll('.hrs-list .hrs-row');
+
+  if (hrsSource.length) {
+    hrsSource.forEach(function (row) {
+      var centre = txt(row.querySelector('.hrs-center'));
+      var from   = txt(row.querySelector('.hrs-date'));
+      if (!centre || !from) return;
+
+      var kind = txt(row.querySelector('.hrs-type')).toLowerCase();
+      // An Event is informational and never changes a centre's hours.
+      if (kind.indexOf('event') === 0) return;
+
+      var entry = (kind.indexOf('alt') === 0)
+        ? { kind:'alt', label: txt(row.querySelector('.hrs-hours')) }
+        : { kind:'closed' };
+
+      addOverride(centre, from, txt(row.querySelector('.hrs-enddate')), entry);
+    });
+  } else {
+
   document.querySelectorAll('.announce-row').forEach(function (row) {
     var c = row.querySelector('.row-center'), d = row.querySelector('.row-date');
     if (!c || !d) return;
@@ -504,6 +548,13 @@ document.addEventListener('DOMContentLoaded', function () {
       day = isoPlus(day, 1);
     }
   });
+
+  }
+
+  if (!hrsSource.length && document.querySelector('.hours-list')) {
+    console.warn('[schedule] Today\'s Hours is reading the Upcoming rows. Add the '
+      + 'unlimited .hrs-list collection list so a display limit cannot hide a closure.');
+  }
 
   function isoPlus(iso, n) {
     var p = iso.split('-');
