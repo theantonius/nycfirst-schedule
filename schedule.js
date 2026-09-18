@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-18 10:45';
+var SCHEDULE_BUILD = '2026-09-18 11:54';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -416,7 +416,14 @@ document.addEventListener('DOMContentLoaded', function () {
     'qpl jamaica central': 'JA',
     'jamaica': 'JA',
     'qpl cambria heights': 'CH',
-    'cambria heights': 'CH'
+    'cambria heights': 'CH',
+    'brooklyn: district 13': 'D13',
+    'cambria heights: qpl': 'CH',
+    'far rockaway: qpl': 'FR',
+    'jamaica: qpl': 'JA',
+    'roosevelt island: cornell tech': 'CT',
+    'south bronx: andrew freedman home': 'AFH',
+    'washington heights: nypl': 'WH'
   };
   function ckey(s) {
     var k = String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -426,13 +433,19 @@ document.addEventListener('DOMContentLoaded', function () {
   // Card order, matching the nav menu on the internal site. Done here rather than with a
   // CMS sort field, because adding a field is a collection structure change and that
   // blocks Webflow's publish-one-item-at-a-time, forcing a full site publish.
-  var ORDER = ['CT','WH','D13','AFH','FR','CH','JA','HY'];
+  var ORDER = ['D13','CH','FR','JA','HY','CT','AFH','WH'];
 
   // Public-facing name overrides, keyed on the canonical abbreviation. Lets a card read
   // differently from the CMS item name without editing items we do not own.
   var DISPLAY = {
-    'D13': 'District 13 Brooklyn',
-    'HY':  'Manhattan: Hudson Yards'
+    'D13': 'Brooklyn: District 13',
+    'CH':  'Cambria Heights: QPL',
+    'FR':  'Far Rockaway: QPL',
+    'JA':  'Jamaica: QPL',
+    'HY':  'Manhattan: Hudson Yards',
+    'CT':  'Roosevelt Island: Cornell Tech',
+    'AFH': 'South Bronx: Andrew Freedman Home',
+    'WH':  'Washington Heights: NYPL'
   };
 
   // Public wording for the labels that are not clock hours, keyed on the CMS text
