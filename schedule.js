@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-18 10:42';
+var SCHEDULE_BUILD = '2026-09-18 10:45';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -719,13 +719,3 @@ document.addEventListener('DOMContentLoaded', function () {
   loadOverrides().then(renderHours);
 });
 
-// Today's Hours works out closures by reading the Upcoming rows. A page with
-// the hours block but no announcement rows will quietly show normal hours for
-// a closed centre, which is worse than an error. Say so in the console.
-document.addEventListener('DOMContentLoaded', function () {
-  if (document.querySelector('.hours-list') && !document.querySelector('.announce-row')) {
-    console.warn('[schedule] Today\'s Hours is on this page but the announcements '
-      + 'Collection List is not. Closures and alternate hours will NOT override '
-      + 'the regular hours. Add the announcements list to this page.');
-  }
-});
