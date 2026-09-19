@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-19 14:15';
+var SCHEDULE_BUILD = '2026-09-19 15:49';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -68,15 +68,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---------- teaser mode ----------
   // Opt-in via .sc-teaser on the wrapper (the home page). Shows only what
   // starts inside the window, capped, as a flat list with no month headings.
-  // Tag code -> full name, shown as a hover tooltip on the pill. Interim: this
-  // belongs in a Webflow Tags collection so adding a tag needs no deploy.
+  // Tag code -> { name, color }. Filled at run time from the hidden
+  // .row-tagcolors element each row carries, which n8n writes from the Monday
+  // Tags board as "FTC=#f57e03=FIRST Tech Challenge|FT=#0e7c7b=Field Trips".
+  // Nothing about tags is hardcoded here: adding one is a Monday row, no deploy.
   // Tooltips do not exist on touch devices.
-  var TAG_NAMES = {
-    'FLL': 'FIRST LEGO League',
-    'FTC': 'FIRST Tech Challenge',
-    'FRC': 'FIRST Robotics Competition',
-    'PD':  'Professional Development'
-  };
+  var TAG_META = {};
 
   // The Collection List itself must stay UNLIMITED: the Today's Hours script
   // reads every announcement row to find closures, so trimming the list in
@@ -120,6 +117,19 @@ document.addEventListener('DOMContentLoaded', function () {
       .map(function (s) { return s.trim().toUpperCase(); })
       .filter(Boolean);
     var regEl   = row.querySelector('.row-reglink');
+
+    // "CODE=#hex=Full Name" entries, pipe separated. A tag still awaiting
+    // review has no colour yet and simply keeps the neutral pill.
+    txt(row.querySelector('.row-tagcolors')).split('|').forEach(function (entry) {
+      var bits = entry.split('=');
+      var code = (bits[0] || '').trim().toUpperCase();
+      if (!code) return;
+      var meta = TAG_META[code] || (TAG_META[code] = {});
+      var colour = (bits[1] || '').trim();
+      var full   = bits.slice(2).join('=').trim();
+      if (colour) meta.color = colour;
+      if (full)   meta.name  = full;
+    });
 
     // Finished rows are dropped on EVERY page, not just the teaser. The CMS list
     // is deliberately unfiltered — Today's Hours needs to see a closure that
@@ -207,8 +217,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // programme on the board needs no code change
         tag.className = 'c-tag prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         tag.textContent = pr;
-        // Full name on hover. An unlisted code simply gets no tooltip.
-        if (TAG_NAMES[pr]) tag.title = TAG_NAMES[pr];
+        var meta = TAG_META[pr] || {};
+        // Full name on hover. A tag with no full name simply gets no tooltip.
+        if (meta.name) tag.title = meta.name;
+        if (meta.color) {
+          tag.style.setProperty('--tag-color', meta.color);
+          tag.style.setProperty('--tag-ink', '#fff');
+        }
         tags.appendChild(tag);
       });
       body.appendChild(tags);
@@ -281,6 +296,9 @@ document.addEventListener('DOMContentLoaded', function () {
         b3.setAttribute('data-prog', pr);
         b3.setAttribute('aria-pressed', 'false');
         b3.textContent = pr;
+        var cmeta = TAG_META[pr] || {};
+        if (cmeta.name)  b3.title = cmeta.name;
+        if (cmeta.color) b3.style.setProperty('--tag-color', cmeta.color);
         progWrap.appendChild(b3);
       });
       bar.appendChild(progWrap);

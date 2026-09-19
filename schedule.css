@@ -1,6 +1,6 @@
-/* schedule build: 2026-09-19 14:15 */
+/* schedule build: 2026-09-19 15:49 */
 /* keep the raw Webflow output out of sight */
-.hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program { display:none; }
+.hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors { display:none; }
 .month-label { display:none; }
 
 .month-stack { display:flex; flex-direction:column; gap:16px; max-width:680px; }
@@ -142,26 +142,21 @@
 @media (max-width:991px) { .sc-teaser { max-width:none; margin-left:16px; margin-right:16px; } }
 
 /* ============================================================
-   Program tags. Colours match the Programs collection in Webflow;
-   an unrecognised code falls back to neutral grey so adding a
-   program on the Monday board needs no code change.
+   Program tags. Every colour comes from the Monday Tags board by way of
+   the CMS, so adding a tag or changing a colour needs no deploy.
    ============================================================ */
 .c-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
 
+/* Colour comes from the CMS as --tag-color; a tag with no colour set yet
+   keeps the neutral pill. Nothing is listed per-code here on purpose. */
 .c-tag { font-size:11px; font-weight:700; letter-spacing:0.6px; line-height:1;
   text-transform:uppercase; padding:5px 9px; border-radius:6px;
-  background:#EDECE8; color:#5F5E5A; }
-.c-tag.prog-fll { background:#00A651; color:#fff; }
-.c-tag.prog-ftc { background:#F57E03; color:#fff; }
-.c-tag.prog-frc { background:#009CD7; color:#fff; }
+  background:var(--tag-color, #EDECE8); color:var(--tag-ink, #5F5E5A); }
 
 /* program chips in the filter bar — outlined until selected, then filled
    in the same colour as the row tags */
 .sc-chips-prog { display:flex; flex-wrap:wrap; gap:8px; }
-.sc-chip.is-prog[aria-pressed="true"] { background:#5F5E5A; color:#fff; }
-.sc-chip.is-prog.prog-fll[aria-pressed="true"] { background:#00A651; color:#fff; }
-.sc-chip.is-prog.prog-ftc[aria-pressed="true"] { background:#F57E03; color:#fff; }
-.sc-chip.is-prog.prog-frc[aria-pressed="true"] { background:#009CD7; color:#fff; }
+.sc-chip.is-prog[aria-pressed="true"] { background:var(--tag-color, #5F5E5A); color:#fff; }
 
 /* Today's Hours cards link to their center page. */
 .center-card.is-linked { cursor: pointer; transition: background-color .12s ease; }
