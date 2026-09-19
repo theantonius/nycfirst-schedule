@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-18 15:12 */
+/* schedule build: 2026-09-19 14:12 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program { display:none; }
 .month-label { display:none; }
@@ -162,3 +162,10 @@
 .sc-chip.is-prog.prog-fll[aria-pressed="true"] { background:#00A651; color:#fff; }
 .sc-chip.is-prog.prog-ftc[aria-pressed="true"] { background:#F57E03; color:#fff; }
 .sc-chip.is-prog.prog-frc[aria-pressed="true"] { background:#009CD7; color:#fff; }
+
+/* Today's Hours cards link to their center page. */
+.center-card.is-linked { cursor: pointer; }
+.center-card .center-link { color: inherit; text-decoration: none; }
+.center-card.is-linked:hover { border-color: #2C2C2A; }
+.center-card.is-linked:hover .center-link { text-decoration: underline; }
+.center-card .center-link:focus-visible { outline: 2px solid #007EB5; outline-offset: 2px; }

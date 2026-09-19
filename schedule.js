@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-18 15:12';
+var SCHEDULE_BUILD = '2026-09-19 14:12';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -448,6 +448,12 @@ document.addEventListener('DOMContentLoaded', function () {
     'WH':  'Washington Heights: NYPL'
   };
 
+  // Each centre's own page. Jamaica's URL is /jc, not /ja.
+  var SLUG = {
+    'D13': 'd13', 'CH': 'ch', 'FR': 'fr', 'JA': 'jc',
+    'HY': 'hy', 'CT': 'ct', 'AFH': 'afh', 'WH': 'wh'
+  };
+
   // Public wording for the labels that are not clock hours, keyed on the CMS text
   // lowercased. Lets the pill and the sentence differ from what the hours field says.
   var SPECIALS = {
@@ -645,6 +651,24 @@ document.addEventListener('DOMContentLoaded', function () {
     var ck = ckey(nameEl.textContent);
     if (DISPLAY[ck]) nameEl.textContent = DISPLAY[ck];
 
+    // The whole card opens that centre's page. The name becomes a real link so
+    // keyboard and screen-reader users get the same route.
+    if (SLUG[ck] && card.getAttribute('data-sc-linked') !== '1') {
+      card.setAttribute('data-sc-linked', '1');
+      var href = '/stem-center-locations/' + SLUG[ck];
+      var a = document.createElement('a');
+      a.className = 'center-link';
+      a.href = href;
+      a.textContent = nameEl.textContent;
+      nameEl.textContent = '';
+      nameEl.appendChild(a);
+      card.classList.add('is-linked');
+      card.addEventListener('click', function (e) {
+        if (e.target.closest && e.target.closest('a')) return;
+        window.location.href = href;
+      });
+    }
+
     function dayInfo(offset) {
       var iso = isoPlus(now.iso, offset);
       var ov = overrides[ck + '|' + iso];
@@ -666,14 +690,20 @@ document.addEventListener('DOMContentLoaded', function () {
       for (var i = 0; i < 14; i++) {
         var d = dayInfo(i);
         if (d.kind === 'closed') continue;
-        if (d.kind === 'special') {
-          if (i === 0) continue;
-          return 'Scheduled programs ' + dayLabel(i);
-        }
+        // Days with no clock hours (by appointment, scheduled programs) cannot
+        // be announced as an opening time, so they are skipped rather than
+        // described. If nothing in the next fortnight has clock hours the card
+        // says only that the centre is closed.
+        if (d.kind === 'special') continue;
         if (i === 0 && now.min >= d.start) continue;
         return 'Open ' + fmt(d.start) + ' – ' + fmt(d.end) + ' ' + dayLabel(i);
       }
-      return 'Reopening to be announced';
+      return '';
+    }
+
+    function closedLine(lead) {
+      var p = nextOpenPhrase();
+      return p ? lead + ' \u00b7 ' + p + '.' : lead + '.';
     }
 
     function setPill(cls, text) {
@@ -694,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Shut all day: the CMS says Closed, or a closure was announced.
     if (today.kind === 'closed') {
       setPill('is-closed', 'CLOSED TODAY');
-      detail.textContent = 'Closed today · ' + nextOpenPhrase() + '.';
+      detail.textContent = closedLine('Closed today');
       return;
     }
 
@@ -710,7 +740,7 @@ document.addEventListener('DOMContentLoaded', function () {
       } else if (now.min < today.start) {
         detail.textContent = 'Closed now · ' + altRange + '.';
       } else {
-        detail.textContent = 'Closed for the day · ' + nextOpenPhrase() + '.';
+        detail.textContent = closedLine('Closed for the day');
       }
       return;
     }
@@ -724,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (now.min < today.start) {
       detail.textContent = 'Closed now · Open ' + fmt(today.start) + ' – ' + fmt(today.end) + ' today.';
     } else {
-      detail.textContent = 'Closed for the day · ' + nextOpenPhrase() + '.';
+      detail.textContent = closedLine('Closed for the day');
     }
   });
   }
