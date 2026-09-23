@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:32';
+var SCHEDULE_BUILD = '2026-09-23 18:38';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -503,7 +503,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var bar = document.createElement('div');
-    bar.className = 'sc-bar';
+    bar.className = 'sc-filterbar';
+
+    // A header line names what the panel is for and holds the quiet reset. Clear
+    // lives here rather than beside a control so it never reads as part of one axis.
+    var head = document.createElement('div');
+    head.className = 'sc-filterbar-head';
+    var headTitle = document.createElement('span');
+    headTitle.className = 'sc-filterbar-title';
+    headTitle.textContent = 'Filter upcoming updates';
+    head.appendChild(headTitle);
+    bar.appendChild(head);
 
     // ---- Show: single select, radio semantics ----
     var showGroup = group('Show', 'sc-group-show');
@@ -542,11 +552,9 @@ document.addEventListener('DOMContentLoaded', function () {
       b.textContent = pr;
       var cmeta = TAG_META[pr] || {};
       if (cmeta.name)  b.title = cmeta.name;
-      if (cmeta.color) b.style.setProperty('--tag-color', cmeta.color);
       progWrap.appendChild(b);
     });
     progGroup.appendChild(progWrap);
-    if (programsPresent.length) bar.appendChild(progGroup);
 
     // ---- Schedule type: single select ----
     var schedGroup = group('Schedule type', 'sc-group-sched');
@@ -568,7 +576,6 @@ document.addEventListener('DOMContentLoaded', function () {
       schedWrap.appendChild(b);
     });
     schedGroup.appendChild(schedWrap);
-    if (schedOpts.length > 1) bar.appendChild(schedGroup);
 
     // ---- STEM Center: always visible. People think in places first. ----
     var centreGroup = group('STEM Center', 'sc-group-centre');
@@ -588,12 +595,24 @@ document.addEventListener('DOMContentLoaded', function () {
     centreGroup.appendChild(sel);
     if (centres.length) bar.appendChild(centreGroup);
 
+    // Reserved area. It keeps its height whether it holds a filter or the hint,
+    // so choosing a different Show option never reflows the panel.
+    var more = document.createElement('div');
+    more.className = 'sc-more';
+    var moreHint = document.createElement('p');
+    moreHint.className = 'sc-hint';
+    moreHint.textContent = 'Choose Events or Schedule changes for more filters.';
+    more.appendChild(moreHint);
+    if (programsPresent.length) more.appendChild(progGroup);
+    if (schedOpts.length > 1)   more.appendChild(schedGroup);
+    bar.appendChild(more);
+
     var clear = document.createElement('button');
     clear.type = 'button';
     clear.className = 'sc-clear';
     clear.textContent = 'Clear filters';
     clear.hidden = true;
-    bar.appendChild(clear);
+    head.appendChild(clear);
 
     var none = document.createElement('div');
     none.className = 'sc-none';
@@ -626,8 +645,11 @@ document.addEventListener('DOMContentLoaded', function () {
         b.setAttribute('aria-checked', state.progs.indexOf(b.getAttribute('data-prog')) > -1 ? 'true' : 'false');
       });
       if (sel.value !== state.centre) sel.value = state.centre;
-      progGroup.hidden  = state.show !== 'events';
-      schedGroup.hidden = state.show !== 'changes';
+      var showProg  = state.show === 'events'  && programsPresent.length > 0;
+      var showSched = state.show === 'changes' && schedOpts.length > 1;
+      progGroup.hidden  = !showProg;
+      schedGroup.hidden = !showSched;
+      moreHint.hidden   = showProg || showSched;
       clear.hidden = isDefault();
     }
 

@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 18:32 */
+/* schedule build: 2026-09-23 18:38 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -118,21 +118,21 @@
    Filter bar. Only rendered when the Upcoming wrapper carries
    .sc-filters — the events page, not the home page teaser.
    ============================================================ */
-.sc-bar, .sc-bar * { text-align:left; }
-.sc-bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
-  margin:0 0 16px 0; max-width:680px; }
+.sc-filterbar, .sc-filterbar * { text-align:left; }
+.sc-filterbar { display:flex; flex-direction:column; gap:14px;
+  background:#FAFAF8; border:1px solid #D3D1C7; border-radius:12px;
+  padding:16px 18px; margin-bottom:16px; max-width:680px; }
+
+.sc-filterbar-head { display:flex; align-items:baseline; justify-content:space-between;
+  gap:12px; }
+.sc-filterbar-title { font:inherit; font-size:16px; font-weight:600; color:#231F20; }
 
 .sc-chips { display:flex; flex-wrap:wrap; gap:8px; }
 
-.sc-chip { font:inherit; font-size:13px; font-weight:700; text-transform:uppercase;
+.sc-chip { font:inherit; font-size:14px; font-weight:500; text-transform:none;
   letter-spacing:0.6px; line-height:1; padding:8px 14px; border-radius:999px;
   border:1px solid #D3D1C7; background:#fff; color:#5F5E5A; cursor:pointer; }
 .sc-chip:hover { border-color:#9AA0A6; }
-.sc-chip[aria-pressed="true"], .sc-chip[aria-checked="true"] {
-  color:#fff; border-color:transparent; }
-.sc-chip.is-event[aria-checked="true"], .sc-chip.is-event[aria-pressed="true"] { background:#0066B3; }
-.sc-chip.is-closed[aria-checked="true"], .sc-chip.is-closed[aria-pressed="true"] { background:#D92D20; }
-.sc-chip.is-alt[aria-checked="true"], .sc-chip.is-alt[aria-pressed="true"] { background:#F5C542; color:#1A1A1A; }
 
 /* Fixed width, or the control resizes to whichever centre is selected and
    drags the item count across the bar with it. */
@@ -186,18 +186,20 @@
 
 /* Each axis is a labelled group, so a visitor can tell what a control is FOR
    before working out what pressing it does. Groups stack; chips inside wrap. */
-.sc-group { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.sc-group { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
 .sc-group[hidden] { display:none; }
-.sc-label { font:inherit; font-size:12px; font-weight:700; letter-spacing:0.6px;
-  text-transform:uppercase; color:#5F5E5A; }
+.sc-label { font:inherit; font-size:14px; font-weight:600; color:#5F5E5A;
+  flex:0 0 auto; min-width:104px; }
 
 /* A single-select chip reads as a segment: square-ish ends, joined feel. A
    multi-select programme chip keeps the pill shape. Different shape, different
    rule — that is the whole point of splitting them. */
 .sc-radio { border-radius:8px; }
-.sc-radio[aria-checked="true"] { background:#231F20; color:#fff; border-color:transparent; }
+.sc-chip.is-prog { border-radius:999px; }
+.sc-chip[aria-checked="true"], .sc-chip[aria-pressed="true"] {
+  background:#E7F1F9; border-color:#0066B3; color:#0066B3; font-weight:600; }
 
-.sc-clear { font:inherit; font-size:14px; font-weight:600; color:#0066B3;
+.sc-clear { font:inherit; font-size:14px; font-weight:500; color:#0066B3;
   background:none; border:0; padding:0; cursor:pointer; text-decoration:underline;
   text-underline-offset:3px; }
 .sc-clear:hover { color:#004E8A; }
@@ -205,9 +207,13 @@
 
 .sc-none { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
 
+/* Reserved contextual area: a min-height means swapping Program for Schedule type,
+   or for the hint, never changes the panel's overall shape. */
+.sc-more { min-height:40px; display:flex; align-items:center; }
+.sc-hint { font:inherit; font-size:14px; color:#8A8880; margin:0; }
+.sc-hint[hidden] { display:none; }
+
 .sc-chips-prog { display:flex; flex-wrap:wrap; gap:8px; }
-.sc-chip.is-prog[aria-checked="true"], .sc-chip.is-prog[aria-pressed="true"] {
-  background:var(--tag-color, #5F5E5A); color:#fff; }
 
 /* Today's Hours cards link to their center page. */
 .center-card.is-linked { cursor: pointer; transition: background-color .12s ease; }
