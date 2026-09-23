@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:04';
+var SCHEDULE_BUILD = '2026-09-23 18:10';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -325,6 +325,24 @@ document.addEventListener('DOMContentLoaded', function () {
     pill.textContent = pillText;
     top.appendChild(pill);
 
+    if (programs.length) {
+      programs.forEach(function (pr) {
+        var tag = document.createElement('span');
+        // unknown codes still render, just in the neutral colour, so adding a
+        // programme on the board needs no code change
+        tag.className = 'c-tag prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        tag.textContent = pr;
+        var meta = TAG_META[pr] || {};
+        // Full name on hover. A tag with no full name simply gets no tooltip.
+        if (meta.name) tag.title = meta.name;
+        if (meta.color) {
+          tag.style.setProperty('--tag-color', meta.color);
+          tag.style.setProperty('--tag-ink', '#fff');
+        }
+        top.appendChild(tag);
+      });
+    }
+
     body.appendChild(top);
 
     var place = host || centre;
@@ -368,32 +386,20 @@ document.addEventListener('DOMContentLoaded', function () {
         ml.rel = 'noopener';
         ml.textContent = addr;
         ad.appendChild(ml);
+        ad.appendChild(document.createTextNode(' \u00b7 '));
+        var vm = document.createElement('a');
+        vm.href = mapHref;
+        vm.target = '_blank';
+        vm.rel = 'noopener';
+        vm.className = 'c-maplink';
+        vm.textContent = 'View map';
+        ad.appendChild(vm);
       } else {
         ad.textContent = addr;
       }
       body.appendChild(ad);
     }
 
-    if (programs.length) {
-      var tags = document.createElement('div');
-      tags.className = 'c-tags';
-      programs.forEach(function (pr) {
-        var tag = document.createElement('span');
-        // unknown codes still render, just in the neutral colour, so adding a
-        // programme on the board needs no code change
-        tag.className = 'c-tag prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        tag.textContent = pr;
-        var meta = TAG_META[pr] || {};
-        // Full name on hover. A tag with no full name simply gets no tooltip.
-        if (meta.name) tag.title = meta.name;
-        if (meta.color) {
-          tag.style.setProperty('--tag-color', meta.color);
-          tag.style.setProperty('--tag-ink', '#fff');
-        }
-        tags.appendChild(tag);
-      });
-      body.appendChild(tags);
-    }
     // A closure or alt-hours row publishes its reason as the announcement, and the
     // title already reads "Closed - <reason>". Printing it again just repeats it,
     // so only events carry a description line.
