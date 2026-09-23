@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 17:40';
+var SCHEDULE_BUILD = '2026-09-23 17:43';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -80,13 +80,10 @@ document.addEventListener('DOMContentLoaded', function () {
              ' TO ' + WD[end.getDay()] + ' ' + end.getDate() + ' ' + MON[end.getMonth()];
     }
 
-    var tail;
-    if (type === 'closed') {
-      var days = multi ? Math.round((end - start) / 86400000) + 1 : 1;
-      tail = (multi && USE_ALL_WEEK && days >= 5) ? 'CLOSED ALL WEEK' : 'CLOSED ALL DAY';
-    } else {
-      tail = hours ? tidyHours(hours) : 'ALL DAY';
-    }
+    // Closures and alt-hours rows read as a sentence below, so the header is just
+    // the date. Events keep their hours in the header.
+    if (type !== 'event') return when;
+    var tail = hours ? tidyHours(hours) : 'ALL DAY';
     return when + ' · ' + tail;
   }
 
@@ -236,10 +233,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     body.appendChild(top);
 
-    if (name)   { var n = document.createElement('div'); n.className = 'c-name'; n.textContent = name;   body.appendChild(n); }
     var place = host || centre;
-    if (place) { var c = document.createElement('div'); c.className = 'c-loc';  c.textContent = place; body.appendChild(c); }
-    if (addr) {
+
+    // A closure or alt-hours row says one thing, so it says it once. The stacked
+    // title / centre / reason lines repeated the same words three times over.
+    if (type !== 'event') {
+      var reason = desc || '';
+      var sentence;
+      if (type === 'closed') {
+        sentence = (place || 'This STEM Center') + ' will be closed';
+      } else {
+        sentence = (place || 'This STEM Center') + ' will be open' +
+                   (hours ? ' ' + tidyHours(hours) : '');
+      }
+      if (reason) sentence += ' due to ' + reason;
+      sentence += '.';
+      var sen = document.createElement('div');
+      sen.className = 'c-sentence';
+      sen.textContent = sentence;
+      body.appendChild(sen);
+    }
+
+    // Never return early from here — the row is only appended to the card at the
+    // bottom of this block, so an early exit drops it silently.
+    if (type === 'event' && name) { var n = document.createElement('div'); n.className = 'c-name'; n.textContent = name; body.appendChild(n); }
+    if (type === 'event' && place) { var c = document.createElement('div'); c.className = 'c-loc'; c.textContent = place; body.appendChild(c); }
+    if (type === 'event' && addr) {
       var ad = document.createElement('div');
       ad.className = 'c-addr';
       var mapHref = mapEl && mapEl.getAttribute('href');
