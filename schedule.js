@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-19 15:49';
+var SCHEDULE_BUILD = '2026-09-23 17:23';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -95,6 +95,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---- read what Webflow rendered ----
     var month   = txt(row.querySelector('.month-label'));
     var centre  = txt(row.querySelector('.row-center'));
+    // Venue name and address. An off-site event publishes its centre as the
+    // catch-all label, which means nothing to a visitor, so the venue wins the
+    // display line. data-center still uses the centre, so the filter is unaffected.
+    var host    = txt(row.querySelector('.row-host'));
+    var addr    = txt(row.querySelector('.row-location'));
     var start   = parseYMD(txt(row.querySelector('.row-date')));
     var end     = parseYMD(txt(row.querySelector('.row-enddate')));
     // The title and the announcement are two sibling elements whose classes both
@@ -206,7 +211,9 @@ document.addEventListener('DOMContentLoaded', function () {
     body.appendChild(top);
 
     if (name)   { var n = document.createElement('div'); n.className = 'c-name'; n.textContent = name;   body.appendChild(n); }
-    if (centre) { var c = document.createElement('div'); c.className = 'c-loc';  c.textContent = centre; body.appendChild(c); }
+    var place = host || centre;
+    if (place) { var c = document.createElement('div'); c.className = 'c-loc';  c.textContent = place; body.appendChild(c); }
+    if (addr)  { var ad = document.createElement('div'); ad.className = 'c-addr'; ad.textContent = addr; body.appendChild(ad); }
 
     if (programs.length) {
       var tags = document.createElement('div');

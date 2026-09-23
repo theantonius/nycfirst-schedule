@@ -1,6 +1,6 @@
-/* schedule build: 2026-09-19 15:49 */
+/* schedule build: 2026-09-23 17:23 */
 /* keep the raw Webflow output out of sight */
-.hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors { display:none; }
+.hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location { display:none; }
 .month-label { display:none; }
 
 .month-stack { display:flex; flex-direction:column; gap:16px; max-width:680px; }
@@ -37,6 +37,7 @@
 
 .c-name { font-size:16px; font-weight:500; color:#2C2C2A; }
 .c-loc  { font-size:14px; font-weight:400; color:#5F5E5A; }
+.c-addr { font-size:13px; font-weight:400; color:#8A8880; }
 .c-desc { font-size:14px; font-weight:400; color:#5F5E5A; line-height:1.6; }
 .c-reg  { font-size:14px; font-weight:500; color:#1D6FD0; text-decoration:underline;
   margin-top:4px; align-self:flex-start; }
