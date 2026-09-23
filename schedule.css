@@ -1,9 +1,10 @@
-/* schedule build: 2026-09-23 18:58 */
+/* schedule build: 2026-09-23 19:04 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
 
-.month-stack { display:flex; flex-direction:column; gap:16px; max-width:680px; }
+.month-stack { display:flex; flex-direction:column; gap:16px;
+  width:100%; max-width:680px; align-self:stretch; box-sizing:border-box; }
 
 .month-card { background:#fff; border:1px solid #D3D1C7; border-radius:12px;
   padding:4px 20px 8px 20px; }
@@ -122,8 +123,10 @@
 /* One compact toolbar, aligned to the same column as the cards, sitting directly
    above them. Sentence case, site blue, square-ish corners — nothing about it
    should read as a separate component library. */
-.sc-filterbar { max-width:680px; margin:0 0 18px 0; padding:0;
-  display:flex; flex-direction:column; gap:9px; }
+.sc-filterbar { width:100%; max-width:680px; align-self:stretch;
+  box-sizing:border-box; margin:0 0 18px 0; padding:12px 14px;
+  background:#F7F6F3; border:1px solid #E5E3DC; border-radius:8px;
+  display:flex; flex-direction:column; gap:8px; }
 
 .sc-filterrow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 
@@ -135,20 +138,21 @@
 .sc-filterrow-2 .sc-select-prog { flex:0 0 200px; width:200px; }
 .sc-filterrow-2 .sc-clear { margin-left:auto; }
 
-.sc-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.sc-chips { display:flex; flex-wrap:wrap; gap:6px; }
 
 .sc-chip { font:inherit; font-size:14px; font-weight:500; text-transform:none;
-  letter-spacing:0; line-height:1.2; padding:7px 12px; border-radius:6px;
+  letter-spacing:0; line-height:1.2; padding:6px 11px; border-radius:6px;
   border:1px solid #D3D1C7; background:#fff; color:#231F20; cursor:pointer; }
 .sc-chip:hover { border-color:#9AA0A6; }
 
 /* Dropdowns match the chips: same height, same border, same corner radius. */
-.sc-select { font:inherit; font-size:14px; padding:7px 10px; border-radius:6px;
+.sc-select { font:inherit; font-size:14px; padding:6px 9px; border-radius:6px;
   border:1px solid #D3D1C7; background:#fff; color:#231F20; max-width:100%; }
 
 
 .sc-none { background:#F3F2EE; border:1px solid #D3D1C7; border-radius:12px;
-  padding:16px 20px; font-size:15px; color:#5F5E5A; max-width:680px; }
+  padding:16px 20px; font-size:15px; color:#5F5E5A;
+  width:100%; max-width:680px; box-sizing:border-box; }
 
 @media (max-width:479px) {
   .sc-chip { font-size:13px; padding:7px 10px; }
