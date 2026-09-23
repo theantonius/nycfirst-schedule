@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:44';
+var SCHEDULE_BUILD = '2026-09-23 18:53';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -348,6 +348,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var place = host || centre;
 
+    // Location identity for the filter. An off-site event is identified by its venue,
+    // a centre event or a closure by its centre. Raw CMS values never surface: a row
+    // whose centre is not a real centre and has no venue simply offers no location.
+    var centreCode = ckey(centre);
+    var locKey = '', locLabel = '', locGroup = '';
+    if (host) {
+      locLabel = host;
+      locKey = 'v-' + host.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      locGroup = 'other';
+    } else if (DISPLAY[centreCode]) {
+      locLabel = DISPLAY[centreCode];
+      locKey = 'c-' + centreCode.toLowerCase();
+      locGroup = 'centre';
+    }
+    if (locKey) {
+      el.setAttribute('data-loc', locKey);
+      el.setAttribute('data-loc-label', locLabel);
+      el.setAttribute('data-loc-group', locGroup);
+    }
+
     // A closure or alt-hours row says one thing, so it says it once. The stacked
     // title / centre / reason lines repeated the same words three times over.
     if (type !== 'event') {
@@ -446,174 +466,121 @@ document.addEventListener('DOMContentLoaded', function () {
   if (host) {
     var allRows = [].slice.call(stack.querySelectorAll('.c-row'));
 
-    // Three axes, and each one is a different KIND of question, so each gets its
-    // own labelled control rather than another row of identical chips:
-    //   Show          - one of all / events / changes        (single select)
-    //   Program       - any of the approved tags             (multi, OR)
-    //   Schedule type - one of all / closed / alt            (single select)
-    //   STEM Center   - one centre                           (single select)
-    // Program only exists for events and Schedule type only for schedule changes,
-    // so each is shown only when it can do anything, and its value is cleared when
-    // it is put away. A filter the visitor cannot see must never still be filtering.
-    var SHOW_LABEL = { all: 'All updates', events: 'Events', changes: 'Schedule changes' };
-    var SCHED_LABEL = { all: 'All', closed: 'Closures', alt: 'Alt hours' };
+    // One flat question — what kind of thing — plus two dropdowns. The page carries
+    // centre closures and off-site events in one stream, so the axes are:
+    //   kind     all / event / closed / alt   single select
+    //   location a centre or a venue          single select, always visible
+    //   program  an approved tag              single select, events only
+    // AND across axes. Program is the only axis that could become multi-select, and
+    // matching is written as "any of" so that change stays a one-line change.
+    var KIND_LABEL = { all: 'All updates', event: 'Events', closed: 'Closures', alt: 'Alt hours' };
 
-    var typesPresent = [], centreValues = [], progsOnPage = [];
+    var typesPresent = [], progsOnPage = [], locs = [];
     allRows.forEach(function (r) {
-      var ty = r.getAttribute('data-type'), ce = r.getAttribute('data-center');
+      var ty = r.getAttribute('data-type');
       if (ty && typesPresent.indexOf(ty) < 0) typesPresent.push(ty);
-      if (ce && centreValues.indexOf(ce) < 0) centreValues.push(ce);
       (r.getAttribute('data-programs') || '').split('|').forEach(function (pr) {
         if (pr && progsOnPage.indexOf(pr) < 0) progsOnPage.push(pr);
       });
+      var key = r.getAttribute('data-loc');
+      if (key && !locs.some(function (l) { return l.key === key; })) {
+        locs.push({ key: key,
+                    label: r.getAttribute('data-loc-label') || '',
+                    group: r.getAttribute('data-loc-group') || 'other' });
+      }
     });
 
-    // Approved tags only. A vetted tag carries a colour from the Tags board; one
-    // still sitting in Pending Review does not. Filtering on that means a typo or a
-    // half-finished tag can never become a public navigation control, while a filter
-    // that would return nothing still never appears.
+    // Approved tags only. A vetted tag carries a colour from the Tags board; one still
+    // in Pending Review does not, so a typo can never become public navigation.
     var programsPresent = progsOnPage.filter(function (pr) {
       return (TAG_META[pr] || {}).color;
     }).sort();
 
-    // The dropdown speaks the same names the cards do, and anything that is not a
-    // real centre — the off-site catch-all included — is not a place, so it is out.
-    var centres = [];
-    centreValues.forEach(function (ce) {
-      var code = ckey(ce);
-      if (DISPLAY[code] && !centres.some(function (c) { return c.code === code; })) {
-        centres.push({ code: code, value: ce, label: DISPLAY[code] });
-      }
-    });
-    centres.sort(function (a, b) { return a.label.localeCompare(b.label); });
+    var centreLocs = locs.filter(function (l) { return l.group === 'centre'; })
+                         .sort(function (a, b) { return a.label.localeCompare(b.label); });
+    var otherLocs  = locs.filter(function (l) { return l.group !== 'centre'; })
+                         .sort(function (a, b) { return a.label.localeCompare(b.label); });
 
-    var hasEvents  = typesPresent.indexOf('event') > -1;
-    var hasChanges = typesPresent.indexOf('closed') > -1 || typesPresent.indexOf('alt') > -1;
-
-    var state = { show: 'all', progs: [], sched: 'all', centre: '' };
-
-    function group(labelText, className) {
-      var g = document.createElement('div');
-      g.className = 'sc-group ' + className;
-      var lab = document.createElement('span');
-      lab.className = 'sc-label';
-      lab.textContent = labelText;
-      g.appendChild(lab);
-      return g;
-    }
+    var state = { kind: 'all', loc: '', prog: '' };
 
     var bar = document.createElement('div');
     bar.className = 'sc-filterbar';
 
-    // One row of controls. Everything a visitor usually wants is here; the rest is
-    // behind More filters, opened on request rather than pushed at them every time
-    // the content type changes. The row's height never depends on the selection.
     var row = document.createElement('div');
     row.className = 'sc-filterrow';
     bar.appendChild(row);
 
-    // ---- content type: single select, radio semantics ----
-    var showWrap = document.createElement('div');
-    showWrap.className = 'sc-chips';
-    showWrap.setAttribute('role', 'radiogroup');
-    showWrap.setAttribute('aria-label', 'Filter by type');
-    var showOpts = ['all'];
-    if (hasEvents)  showOpts.push('events');
-    if (hasChanges) showOpts.push('changes');
-    showOpts.forEach(function (k) {
+    // ---- kind: one flat, mutually exclusive set ----
+    var kindWrap = document.createElement('div');
+    kindWrap.className = 'sc-chips';
+    kindWrap.setAttribute('role', 'radiogroup');
+    kindWrap.setAttribute('aria-label', 'Filter by type');
+    var kindOpts = ['all'].concat(['event', 'closed', 'alt'].filter(function (k) {
+      return typesPresent.indexOf(k) > -1;
+    }));
+    kindOpts.forEach(function (k) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'sc-chip sc-radio';
+      b.className = 'sc-chip';
       b.setAttribute('role', 'radio');
-      b.setAttribute('data-show', k);
+      b.setAttribute('data-kind', k);
       b.setAttribute('aria-checked', k === 'all' ? 'true' : 'false');
-      b.textContent = SHOW_LABEL[k];
-      showWrap.appendChild(b);
+      b.textContent = KIND_LABEL[k];
+      kindWrap.appendChild(b);
     });
-    if (showOpts.length > 2) row.appendChild(showWrap);
+    if (kindOpts.length > 2) row.appendChild(kindWrap);
 
-    // ---- STEM Center: always in the same place, in every mode ----
-    var sel = document.createElement('select');
-    sel.className = 'sc-select';
-    sel.setAttribute('aria-label', 'Filter by STEM Center');
-    var opt0 = document.createElement('option');
-    opt0.value = '';
-    opt0.textContent = 'All STEM Centers';
-    sel.appendChild(opt0);
-    centres.forEach(function (c) {
-      var o = document.createElement('option');
-      o.value = c.code;
-      o.textContent = c.label;
-      sel.appendChild(o);
-    });
-    if (centres.length) row.appendChild(sel);
+    // ---- location: centres and off-site venues, grouped ----
+    var locSel = document.createElement('select');
+    locSel.className = 'sc-select';
+    locSel.setAttribute('aria-label', 'Filter by location');
+    var locAll = document.createElement('option');
+    locAll.value = '';
+    locAll.textContent = 'All locations';
+    locSel.appendChild(locAll);
+    function addLocGroup(label, list) {
+      if (!list.length) return;
+      // Only group when there is something to tell apart.
+      var parent = locSel;
+      if (centreLocs.length && otherLocs.length) {
+        parent = document.createElement('optgroup');
+        parent.label = label;
+        locSel.appendChild(parent);
+      }
+      list.forEach(function (l) {
+        var o = document.createElement('option');
+        o.value = l.key;
+        o.textContent = l.label;
+        parent.appendChild(o);
+      });
+    }
+    addLocGroup('STEM Centers', centreLocs);
+    addLocGroup('Other locations', otherLocs);
+    if (locs.length) row.appendChild(locSel);
 
-    // ---- Program: multi select, OR within the axis ----
-    var progGroup = group('Program', 'sc-group-prog');
-    var progWrap = document.createElement('div');
-    progWrap.className = 'sc-chips sc-chips-prog';
+    // ---- program: events only ----
+    var progSel = document.createElement('select');
+    progSel.className = 'sc-select sc-select-prog';
+    progSel.setAttribute('aria-label', 'Filter by program');
+    var progAll = document.createElement('option');
+    progAll.value = '';
+    progAll.textContent = 'All programs';
+    progSel.appendChild(progAll);
     programsPresent.forEach(function (pr) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'sc-chip is-prog';
-      b.setAttribute('data-prog', pr);
-      b.setAttribute('role', 'checkbox');
-      b.setAttribute('aria-checked', 'false');
-      b.textContent = pr;
-      var cmeta = TAG_META[pr] || {};
-      if (cmeta.name) b.title = cmeta.name;
-      progWrap.appendChild(b);
+      var o = document.createElement('option');
+      o.value = pr;
+      o.textContent = (TAG_META[pr] || {}).name || pr;
+      progSel.appendChild(o);
     });
-    progGroup.appendChild(progWrap);
+    progSel.hidden = true;
+    if (programsPresent.length) row.appendChild(progSel);
 
-    // ---- Schedule type: single select ----
-    var schedGroup = group('Schedule type', 'sc-group-sched');
-    var schedWrap = document.createElement('div');
-    schedWrap.className = 'sc-chips';
-    schedWrap.setAttribute('role', 'radiogroup');
-    schedWrap.setAttribute('aria-label', 'Schedule type');
-    var schedOpts = ['all'];
-    if (typesPresent.indexOf('closed') > -1) schedOpts.push('closed');
-    if (typesPresent.indexOf('alt') > -1)    schedOpts.push('alt');
-    schedOpts.forEach(function (k) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'sc-chip sc-radio';
-      b.setAttribute('role', 'radio');
-      b.setAttribute('data-sched', k);
-      b.setAttribute('aria-checked', k === 'all' ? 'true' : 'false');
-      b.textContent = SCHED_LABEL[k];
-      schedWrap.appendChild(b);
-    });
-    schedGroup.appendChild(schedWrap);
-
-    var hasMore = programsPresent.length > 0 || schedOpts.length > 1;
-
-    var moreBtn = document.createElement('button');
-    moreBtn.type = 'button';
-    moreBtn.className = 'sc-morebtn';
-    moreBtn.textContent = 'More filters';
-    moreBtn.setAttribute('aria-expanded', 'false');
-    moreBtn.setAttribute('aria-controls', 'sc-more-panel');
-    if (hasMore) row.appendChild(moreBtn);
-
-    var more = document.createElement('div');
-    more.className = 'sc-more';
-    more.id = 'sc-more-panel';
-    more.hidden = true;
-    var moreHint = document.createElement('p');
-    moreHint.className = 'sc-hint';
-    moreHint.textContent = 'Choose Events or Schedule changes for more filters.';
-    more.appendChild(moreHint);
-    more.appendChild(progGroup);
-    more.appendChild(schedGroup);
-    bar.appendChild(more);
-
-    // ---- active filters, stated plainly, each one removable ----
-    var summary = document.createElement('div');
-    summary.className = 'sc-summary';
-    summary.hidden = true;
-    bar.appendChild(summary);
+    var clear = document.createElement('button');
+    clear.type = 'button';
+    clear.className = 'sc-clear';
+    clear.textContent = 'Clear filters';
+    clear.hidden = true;
+    row.appendChild(clear);
 
     var none = document.createElement('div');
     none.className = 'sc-none';
@@ -631,99 +598,40 @@ document.addEventListener('DOMContentLoaded', function () {
     stack.parentNode.insertBefore(none, stack.nextSibling);
 
     function isDefault() {
-      return state.show === 'all' && !state.progs.length &&
-             state.sched === 'all' && !state.centre;
+      return state.kind === 'all' && !state.loc && !state.prog;
     }
 
     function syncControls() {
-      [].slice.call(showWrap.children).forEach(function (b) {
-        b.setAttribute('aria-checked', b.getAttribute('data-show') === state.show ? 'true' : 'false');
+      [].slice.call(kindWrap.children).forEach(function (b) {
+        b.setAttribute('aria-checked', b.getAttribute('data-kind') === state.kind ? 'true' : 'false');
       });
-      [].slice.call(schedWrap.children).forEach(function (b) {
-        b.setAttribute('aria-checked', b.getAttribute('data-sched') === state.sched ? 'true' : 'false');
-      });
-      [].slice.call(progWrap.children).forEach(function (b) {
-        b.setAttribute('aria-checked', state.progs.indexOf(b.getAttribute('data-prog')) > -1 ? 'true' : 'false');
-      });
-      if (sel.value !== state.centre) sel.value = state.centre;
-
-      // Which contextual axis the panel WOULD show. The panel itself only opens
-      // when the visitor asks, so this never changes the height on its own.
-      var showProg  = state.show === 'events'  && programsPresent.length > 0;
-      var showSched = state.show === 'changes' && schedOpts.length > 1;
-      progGroup.hidden  = !showProg;
-      schedGroup.hidden = !showSched;
-      moreHint.hidden   = showProg || showSched;
-      renderSummary();
-    }
-
-    // A quiet, removable statement of what is on, so the controls do not have to
-    // stay expanded just to remind anyone what they picked.
-    function renderSummary() {
-      summary.textContent = '';
-      var bits = [];
-      if (state.show !== 'all') bits.push({ kind: 'show', value: state.show, label: SHOW_LABEL[state.show] });
-      if (state.show === 'changes' && state.sched !== 'all') {
-        bits.push({ kind: 'sched', value: state.sched, label: SCHED_LABEL[state.sched] });
-      }
-      if (state.show === 'events') {
-        state.progs.forEach(function (pr) { bits.push({ kind: 'prog', value: pr, label: pr }); });
-      }
-      if (state.centre) {
-        var c = centres.filter(function (x) { return x.code === state.centre; })[0];
-        if (c) bits.push({ kind: 'centre', value: c.code, label: c.label });
-      }
-      summary.hidden = bits.length === 0;
-      if (!bits.length) return;
-
-      bits.forEach(function (bit) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'sc-active';
-        b.setAttribute('data-drop', bit.kind);
-        b.setAttribute('data-value', bit.value);
-        b.textContent = bit.label;
-        var x = document.createElement('span');
-        x.className = 'sc-x';
-        x.setAttribute('aria-hidden', 'true');
-        x.textContent = '\u00d7';
-        b.appendChild(x);
-        b.setAttribute('aria-label', 'Remove filter ' + bit.label);
-        summary.appendChild(b);
-      });
-      var cl = document.createElement('button');
-      cl.type = 'button';
-      cl.className = 'sc-clear';
-      cl.textContent = 'Clear';
-      summary.appendChild(cl);
+      if (locSel.value !== state.loc) locSel.value = state.loc;
+      if (progSel.value !== state.prog) progSel.value = state.prog;
+      // Program belongs to events. It is the one control that comes and goes, and it
+      // sits at the end of the row so nothing else moves when it does.
+      progSel.hidden = !(state.kind === 'event' && programsPresent.length);
+      clear.hidden = isDefault();
     }
 
     function writeUrl() {
       if (!window.history || !history.replaceState) return;
       var q = [];
-      if (state.show !== 'all')   q.push('show=' + state.show);
-      if (state.progs.length)     q.push('program=' + state.progs.join(',').toLowerCase());
-      if (state.sched !== 'all')  q.push('kind=' + state.sched);
-      if (state.centre)           q.push('center=' + state.centre.toLowerCase());
+      if (state.kind !== 'all') q.push('kind=' + state.kind);
+      if (state.loc)            q.push('loc=' + state.loc);
+      if (state.prog)           q.push('program=' + state.prog.toLowerCase());
       history.replaceState(null, '', location.pathname + (q.length ? '?' + q.join('&') : '') + location.hash);
     }
 
     function readUrl() {
       var q = new URLSearchParams(location.search);
-      var show = q.get('show');
-      if (show && showOpts.indexOf(show) > -1) state.show = show;
       var kind = q.get('kind');
-      if (kind && schedOpts.indexOf(kind) > -1) state.sched = kind;
-      var centre = (q.get('center') || '').toUpperCase();
-      if (centre && centres.some(function (c) { return c.code === centre; })) state.centre = centre;
-      (q.get('program') || '').split(',').forEach(function (pr) {
-        var code = pr.trim().toUpperCase();
-        if (code && programsPresent.indexOf(code) > -1 && state.progs.indexOf(code) < 0) state.progs.push(code);
-      });
-      // A filter that is not on screen must not filter. Anything the URL asked for
-      // that belongs to a hidden axis is dropped rather than applied invisibly.
-      if (state.show !== 'events')  state.progs = [];
-      if (state.show !== 'changes') state.sched = 'all';
+      if (kind && kindOpts.indexOf(kind) > -1) state.kind = kind;
+      var loc = q.get('loc');
+      if (loc && locs.some(function (l) { return l.key === loc; })) state.loc = loc;
+      var prog = (q.get('program') || '').toUpperCase();
+      if (prog && programsPresent.indexOf(prog) > -1) state.prog = prog;
+      // A filter that is not on screen must not filter.
+      if (state.kind !== 'event') state.prog = '';
     }
 
     function apply() {
@@ -732,22 +640,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
       allRows.forEach(function (r) {
         var ty = r.getAttribute('data-type');
-        var isChange = ty === 'closed' || ty === 'alt';
+        var okKind = state.kind === 'all' || ty === state.kind;
+        var okLoc  = !state.loc || r.getAttribute('data-loc') === state.loc;
 
-        var okShow = state.show === 'all' ||
-                     (state.show === 'events'  && ty === 'event') ||
-                     (state.show === 'changes' && isChange);
-
-        var okSched = state.show !== 'changes' || state.sched === 'all' || ty === state.sched;
-
-        // OR within the programme axis, AND across axes
+        // "any of" so multi-select programmes stay a one-line change
         var rowProgs = (r.getAttribute('data-programs') || '').split('|');
-        var okProg = state.show !== 'events' || !state.progs.length ||
-                     state.progs.some(function (pr) { return rowProgs.indexOf(pr) > -1; });
+        var wanted = state.prog ? [state.prog] : [];
+        var okProg = state.kind !== 'event' || !wanted.length ||
+                     wanted.some(function (pr) { return rowProgs.indexOf(pr) > -1; });
 
-        var okCentre = !state.centre || ckey(r.getAttribute('data-center') || '') === state.centre;
-
-        var show = okShow && okSched && okProg && okCentre;
+        var show = okKind && okLoc && okProg;
         r.style.display = show ? '' : 'none';
         if (show) shown++;
       });
@@ -765,58 +667,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function reset() {
-      state.show = 'all';
-      state.progs = [];
-      state.sched = 'all';
-      state.centre = '';
+      state.kind = 'all';
+      state.loc = '';
+      state.prog = '';
       apply();
     }
 
-    moreBtn.addEventListener('click', function () {
-      var open = more.hidden;
-      more.hidden = !open;
-      moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-
     bar.addEventListener('click', function (e) {
-      var drop = e.target.closest ? e.target.closest('.sc-active') : null;
-      if (drop) {
-        var kind = drop.getAttribute('data-drop'), val = drop.getAttribute('data-value');
-        if (kind === 'show')   { state.show = 'all'; state.progs = []; state.sched = 'all'; }
-        if (kind === 'sched')  state.sched = 'all';
-        if (kind === 'centre') state.centre = '';
-        if (kind === 'prog') {
-          var j = state.progs.indexOf(val);
-          if (j > -1) state.progs.splice(j, 1);
-        }
-        apply();
-        return;
-      }
       var hit = e.target.closest ? e.target.closest('.sc-chip, .sc-clear') : null;
       if (!hit) return;
       if (hit.classList.contains('sc-clear')) { reset(); return; }
-
-      if (hit.hasAttribute('data-show')) {
-        state.show = hit.getAttribute('data-show');
-        // Switching axis puts the other one away, so clear what it was holding.
-        if (state.show !== 'events')  state.progs = [];
-        if (state.show !== 'changes') state.sched = 'all';
-      } else if (hit.hasAttribute('data-sched')) {
-        state.sched = hit.getAttribute('data-sched');
-      } else if (hit.hasAttribute('data-prog')) {
-        var pr = hit.getAttribute('data-prog');
-        var i = state.progs.indexOf(pr);
-        if (i > -1) state.progs.splice(i, 1); else state.progs.push(pr);
-      }
+      state.kind = hit.getAttribute('data-kind');
+      if (state.kind !== 'event') state.prog = '';
       apply();
     });
 
     noneClear.addEventListener('click', reset);
-
-    sel.addEventListener('change', function () { state.centre = sel.value; apply(); });
+    locSel.addEventListener('change', function () { state.loc = locSel.value; apply(); });
+    progSel.addEventListener('change', function () { state.prog = progSel.value; apply(); });
 
     window.addEventListener('popstate', function () {
-      state.show = 'all'; state.progs = []; state.sched = 'all'; state.centre = '';
+      state.kind = 'all'; state.loc = ''; state.prog = '';
       readUrl();
       apply();
     });

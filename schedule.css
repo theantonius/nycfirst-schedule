@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 18:44 */
+/* schedule build: 2026-09-23 18:53 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -119,38 +119,31 @@
    .sc-filters — the events page, not the home page teaser.
    ============================================================ */
 .sc-filterbar, .sc-filterbar * { text-align:left; }
-/* A small tool above the content, not a form to complete first: one row of
-   controls, a thin rule under it, and the list starting right after. */
-.sc-filterbar { display:flex; flex-direction:column; gap:8px;
-  border-bottom:1px solid #E5E3DC; padding:0 0 10px 0; margin:0 0 12px 0;
-  max-width:680px; }
+/* One compact toolbar, aligned to the same column as the cards, sitting directly
+   above them. Sentence case, site blue, square-ish corners — nothing about it
+   should read as a separate component library. */
+.sc-filterbar { max-width:680px; margin:0 0 10px 0; padding:0 0 8px 0;
+  border-bottom:1px solid #E5E3DC; }
 
 .sc-filterrow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 
 .sc-chips { display:flex; flex-wrap:wrap; gap:8px; }
 
 .sc-chip { font:inherit; font-size:14px; font-weight:500; text-transform:none;
-  letter-spacing:0.6px; line-height:1; padding:8px 14px; border-radius:999px;
-  border:1px solid #D3D1C7; background:#fff; color:#5F5E5A; cursor:pointer; }
+  letter-spacing:0; line-height:1.2; padding:7px 12px; border-radius:6px;
+  border:1px solid #D3D1C7; background:#fff; color:#231F20; cursor:pointer; }
 .sc-chip:hover { border-color:#9AA0A6; }
 
-/* Fixed width, or the control resizes to whichever centre is selected and
-   drags the item count across the bar with it. */
-.sc-select { font:inherit; font-size:14px; padding:8px 12px; border-radius:8px;
-  border:1px solid #D3D1C7; background:#fff; color:#2C2C2A;
-  width:220px; max-width:100%; }
-
-/* Reserved width, right aligned. The text length changes as rows filter, and
-   without a floor the bar jitters or wraps. */
-.sc-count { font-size:13px; color:#888780; margin-left:auto;
-  min-width:120px; text-align:right; white-space:nowrap; }
+/* Dropdowns match the chips: same height, same border, same corner radius. */
+.sc-select { font:inherit; font-size:14px; padding:7px 10px; border-radius:6px;
+  border:1px solid #D3D1C7; background:#fff; color:#231F20; max-width:100%; }
+.sc-select[hidden] { display:none; }
 
 .sc-none { background:#F3F2EE; border:1px solid #D3D1C7; border-radius:12px;
   padding:16px 20px; font-size:15px; color:#5F5E5A; max-width:680px; }
 
 @media (max-width:479px) {
-  .sc-count { margin-left:0; width:100%; }
-  .sc-chip { font-size:12px; padding:7px 12px; }
+    .sc-chip { font-size:12px; padding:7px 12px; }
 }
 
 /* ---- teaser (home page): flat list, so no card wrapper to sit inside ---- */
@@ -186,30 +179,15 @@
 
 /* Each axis is a labelled group, so a visitor can tell what a control is FOR
    before working out what pressing it does. Groups stack; chips inside wrap. */
-.sc-group { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
-.sc-group[hidden] { display:none; }
-.sc-label { font:inherit; font-size:13px; font-weight:600; color:#5F5E5A;
-  flex:0 0 auto; }
 
-/* A single-select chip reads as a segment: square-ish ends, joined feel. A
-   multi-select programme chip keeps the pill shape. Different shape, different
-   rule — that is the whole point of splitting them. */
-.sc-radio { border-radius:8px; }
-.sc-chip.is-prog { border-radius:999px; }
+/* Selected takes the site blue with white text; everything unselected stays a
+   plain white control with a neutral border. One component, two states. */
 .sc-chip[aria-checked="true"], .sc-chip[aria-pressed="true"] {
-  background:#E7F1F9; border-color:#0066B3; color:#0066B3; font-weight:600; }
+  background:#0066B3; border-color:#0066B3; color:#fff; font-weight:600; }
 
-.sc-summary { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
-.sc-summary[hidden] { display:none; }
-.sc-active { font:inherit; font-size:13px; font-weight:500; color:#0066B3;
-  background:#E7F1F9; border:1px solid #CFE3F3; border-radius:999px;
-  padding:3px 8px 3px 10px; cursor:pointer; display:inline-flex; align-items:center;
-  gap:6px; }
-.sc-active:hover { background:#D9EAF7; }
-.sc-active:focus-visible { outline:2px solid #0066B3; outline-offset:2px; }
-.sc-x { font-size:14px; line-height:1; opacity:0.7; }
 
-.sc-clear { font:inherit; font-size:13px; font-weight:500; color:#5F5E5A;
+.sc-clear { font:inherit; font-size:14px; font-weight:500; color:#5F5E5A;
+  margin-left:4px;
   background:none; border:0; padding:0; cursor:pointer; text-decoration:underline;
   text-underline-offset:3px; }
 .sc-clear:hover { color:#231F20; }
@@ -218,23 +196,6 @@
 .sc-none { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
 .sc-none[hidden] { display:none; }
 
-/* Reserved contextual area: a min-height means swapping Program for Schedule type,
-   or for the hint, never changes the panel's overall shape. */
-.sc-morebtn { font:inherit; font-size:14px; font-weight:500; color:#5F5E5A;
-  background:none; border:0; padding:4px 2px; margin-left:auto; cursor:pointer;
-  text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
-.sc-morebtn:hover { color:#231F20; }
-.sc-morebtn[aria-expanded="true"] { color:#0066B3; }
-.sc-morebtn:focus-visible { outline:2px solid #0066B3; outline-offset:2px; border-radius:3px; }
-
-/* Collapsed by default; opens only on request, so the row above never moves. */
-.sc-more { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
-  padding:8px 0 2px 0; }
-.sc-more[hidden] { display:none; }
-.sc-hint { font:inherit; font-size:13px; color:#8A8880; margin:0; }
-.sc-hint[hidden] { display:none; }
-
-.sc-chips-prog { display:flex; flex-wrap:wrap; gap:8px; }
 
 /* Today's Hours cards link to their center page. */
 .center-card.is-linked { cursor: pointer; transition: background-color .12s ease; }
