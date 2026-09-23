@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 17:23';
+var SCHEDULE_BUILD = '2026-09-23 17:35';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // display line. data-center still uses the centre, so the filter is unaffected.
     var host    = txt(row.querySelector('.row-host'));
     var addr    = txt(row.querySelector('.row-location'));
+    var mapEl   = row.querySelector('.row-maplink');
     var start   = parseYMD(txt(row.querySelector('.row-date')));
     var end     = parseYMD(txt(row.querySelector('.row-enddate')));
     // The title and the announcement are two sibling elements whose classes both
@@ -213,7 +214,23 @@ document.addEventListener('DOMContentLoaded', function () {
     if (name)   { var n = document.createElement('div'); n.className = 'c-name'; n.textContent = name;   body.appendChild(n); }
     var place = host || centre;
     if (place) { var c = document.createElement('div'); c.className = 'c-loc';  c.textContent = place; body.appendChild(c); }
-    if (addr)  { var ad = document.createElement('div'); ad.className = 'c-addr'; ad.textContent = addr; body.appendChild(ad); }
+    if (addr) {
+      var ad = document.createElement('div');
+      ad.className = 'c-addr';
+      var mapHref = mapEl && mapEl.getAttribute('href');
+      // A row with no map link still shows the address, just as plain text.
+      if (mapHref && mapHref !== '#') {
+        var ml = document.createElement('a');
+        ml.href = mapHref;
+        ml.target = '_blank';
+        ml.rel = 'noopener';
+        ml.textContent = addr;
+        ad.appendChild(ml);
+      } else {
+        ad.textContent = addr;
+      }
+      body.appendChild(ad);
+    }
 
     if (programs.length) {
       var tags = document.createElement('div');
