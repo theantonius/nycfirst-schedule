@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 18:14 */
+/* schedule build: 2026-09-23 18:17 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -45,8 +45,7 @@
 .c-addr a { color:#4A4844; text-decoration:underline;
   text-decoration-color:rgba(74,72,68,0.35); text-underline-offset:2px; }
 .c-addr a:hover { color:#1D6FD0; text-decoration-color:#1D6FD0; }
-.c-desc.is-clamped { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-  overflow:hidden; }
+.c-desc[hidden] { display:none; }
 .c-more { align-self:flex-start; margin-top:2px; padding:0; border:0; background:none;
   font:inherit; font-size:13px; font-weight:500; color:#1D6FD0; cursor:pointer;
   text-decoration:underline; text-underline-offset:2px; }

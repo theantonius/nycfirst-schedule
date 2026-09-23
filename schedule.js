@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:14';
+var SCHEDULE_BUILD = '2026-09-23 18:17';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -401,27 +401,26 @@ document.addEventListener('DOMContentLoaded', function () {
       d.className = 'c-desc';
       linkify(d, desc);
       body.appendChild(d);
-      // Threshold rather than measured height: no layout read, no flash of the
-      // full text, and it errs toward leaving short descriptions alone.
-      if (desc.length > 160) {
-        d.classList.add('is-clamped');
-        var descId = 'c-desc-' + (++DESC_SEQ);
-        d.id = descId;
-        var more = document.createElement('button');
-        more.type = 'button';
-        more.className = 'c-more';
-        more.textContent = 'Read more';
-        more.setAttribute('aria-expanded', 'false');
-        more.setAttribute('aria-controls', descId);
-        more.addEventListener('click', function () {
-          var open = d.classList.toggle('is-clamped') === false;
-          more.textContent = open ? 'Show less' : 'Read more';
-          more.setAttribute('aria-expanded', open ? 'true' : 'false');
-        });
-        // The control sits above the text it controls, directly under the address,
-        // so it is visible without reading the preview first.
-        body.insertBefore(more, d);
-      }
+      // The description is hidden until asked for. A page can carry a hundred
+      // near-identical qualifiers, and every row reading the same three sentences
+      // is what makes the list unscannable.
+      var descId = 'c-desc-' + (++DESC_SEQ);
+      d.id = descId;
+      d.hidden = true;
+      var more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'c-more';
+      more.textContent = 'Read more';
+      more.setAttribute('aria-expanded', 'false');
+      more.setAttribute('aria-controls', descId);
+      more.addEventListener('click', function () {
+        var open = d.hidden;
+        d.hidden = !open;
+        more.textContent = open ? 'Show less' : 'Read more';
+        more.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      // Directly under the address, above the text it reveals.
+      body.insertBefore(more, d);
     }
 
     if (regEl && regEl.getAttribute('href')) {
