@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 17:38';
+var SCHEDULE_BUILD = '2026-09-23 17:40';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -277,7 +277,10 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       body.appendChild(tags);
     }
-    if (desc)   { var d = document.createElement('div'); d.className = 'c-desc'; linkify(d, desc);       body.appendChild(d); }
+    // A closure or alt-hours row publishes its reason as the announcement, and the
+    // title already reads "Closed - <reason>". Printing it again just repeats it,
+    // so only events carry a description line.
+    if (desc && type === 'event') { var d = document.createElement('div'); d.className = 'c-desc'; linkify(d, desc); body.appendChild(d); }
 
     if (regEl && regEl.getAttribute('href')) {
       var a = document.createElement('a');
