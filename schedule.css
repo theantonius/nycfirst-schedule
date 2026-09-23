@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 17:50 */
+/* schedule build: 2026-09-23 18:01 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -12,15 +12,15 @@
   padding-top:14px; padding-bottom:8px; }
 
 /* ---- Option C row ---- */
-.c-row { display:flex; flex-direction:row; gap:17px; align-items:stretch;
-  padding-top:14px; padding-bottom:14px; border-top:1px solid #D3D1C7; }
+.c-row { display:flex; flex-direction:row; gap:14px; align-items:stretch;
+  padding-top:10px; padding-bottom:10px; border-top:1px solid #D3D1C7; }
 
 .c-stripe { flex:0 0 4px; width:4px; border-radius:999px; background:#9AA0A6; }
 .c-row.is-event  .c-stripe { background:#1D6FD0; }
 .c-row.is-closed .c-stripe { background:#D92D20; }
 .c-row.is-alt    .c-stripe { background:#F5C542; }
 
-.c-body { display:flex; flex-direction:column; gap:3px; flex:1 1 auto; min-width:0; }
+.c-body { display:flex; flex-direction:column; gap:2px; flex:1 1 auto; min-width:0; }
 
 .c-top { display:flex; flex-direction:row; gap:10px; align-items:center;
   justify-content:flex-start; }

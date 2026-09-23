@@ -1,7 +1,53 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 17:50';
+var SCHEDULE_BUILD = '2026-09-23 18:01';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
+
+// Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
+// need it: the Upcoming rows and the Today's Hours cards. It used to sit inside the
+// second block, which put it out of scope for the first.
+  var ALIASES = {
+    'washington heights': 'WH',
+    'cornell tech': 'CT',
+    'andrew freedman home': 'AFH',
+    'hudson yards': 'HY',
+    'manhattan: hudson yards': 'HY',
+    'manhattan': 'HY',
+    'd13': 'D13',
+    'school district 13': 'D13',
+    'district 13 stem center': 'D13',
+    'district 13 brooklyn': 'D13',
+    'qpl far rockaway': 'FR',
+    'far rockaway': 'FR',
+    'qpl jamaica central': 'JA',
+    'jamaica': 'JA',
+    'qpl cambria heights': 'CH',
+    'cambria heights': 'CH',
+    'brooklyn: district 13': 'D13',
+    'cambria heights: qpl': 'CH',
+    'far rockaway: qpl': 'FR',
+    'jamaica: qpl': 'JA',
+    'roosevelt island: cornell tech': 'CT',
+    'south bronx: andrew freedman home': 'AFH',
+    'washington heights: nypl': 'WH'
+  };
+  function ckey(s) {
+    var k = String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    return ALIASES[k] || k;
+  }
+
+  // Public-facing name overrides, keyed on the canonical abbreviation. Lets a card read
+  // differently from the CMS item name without editing items we do not own.
+  var DISPLAY = {
+    'D13': 'Brooklyn: District 13',
+    'CH':  'Cambria Heights: QPL',
+    'FR':  'Far Rockaway: QPL',
+    'JA':  'Jamaica: QPL',
+    'HY':  'Manhattan: Hudson Yards',
+    'CT':  'Roosevelt Island: Cornell Tech',
+    'AFH': 'South Bronx: Andrew Freedman Home',
+    'WH':  'Washington Heights: NYPL'
+  };
 
 document.addEventListener('DOMContentLoaded', function () {
   var list = document.querySelector('.announce-list');
@@ -72,7 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var part = function (h, mins, mer) { return h + (mins && mins !== '00' ? ':' + mins : '') + mer; };
     var a = ap(m[3]), b = ap(m[6]);
     // 5-7pm when both ends share a meridiem, 11am-1pm when they do not
-    return (a === b ? part(m[1], m[2], '') : part(m[1], m[2], a)) + '\u2013' + part(m[4], m[5], b);
+    var up = function (x) { return x ? ' ' + x.toUpperCase() : ''; };
+    return (a === b ? part(m[1], m[2], '') : part(m[1], m[2], '') + up(a)) + '\u2013' + part(m[4], m[5], '') + up(b);
   }
 
   // The Reason dropdown is a mix of causes and occasions, so "due to" cannot be
@@ -210,13 +257,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var pillEvent  = row.querySelector('.status-pill.is-event');
 
     var type = 'event', pillText = 'EVENT', hours = '';
-    if (visible(pillClosed))      { type = 'closed'; pillText = 'CLOSED'; }
+    if (visible(pillClosed))      { type = 'closed'; pillText = 'CLOSURE'; }
     else if (visible(pillAlt))    { type = 'alt';    pillText = 'ALT HOURS'; hours = txt(pillAlt); }
     else if (visible(pillEvent))  { type = 'event';  pillText = 'EVENT';     hours = txt(pillEvent); }
     else {
       // no pill rendered: fall back to the type label
       var t = txt(row.querySelector('.type-label')).toLowerCase();
-      if (t.indexOf('clos') === 0) { type = 'closed'; pillText = 'CLOSED'; }
+      if (t.indexOf('clos') === 0) { type = 'closed'; pillText = 'CLOSURE'; }
       else if (t.indexOf('alt') === 0) { type = 'alt'; pillText = 'ALT HOURS'; }
     }
     // an event pill carries the hours string, not the word EVENT
@@ -270,12 +317,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // A closure or alt-hours row says one thing, so it says it once. The stacked
     // title / centre / reason lines repeated the same words three times over.
     if (type !== 'event') {
+      // The CMS carries the short centre name; the cards carry the location-first
+      // one. DISPLAY is the single source for the public wording, so use it here too.
+      var display = DISPLAY[ckey(place)] || place;
       var phrase = reasonPhrase(desc);
       var sentence;
       if (type === 'closed') {
-        sentence = (place || 'This STEM Center') + ' will be closed';
+        sentence = (display || 'This STEM Center') + ' will be closed';
       } else {
-        sentence = (place || 'This STEM Center') + ' will be open' +
+        sentence = (display || 'This STEM Center') + ' will be open' +
                    (hours ? ' ' + sentenceHours(hours) : '');
       }
       if (phrase) sentence += ' ' + phrase;
@@ -462,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // One constant phrasing. Switching between "4 items" and "Showing 1 of 4"
       // changed the width of this element, which reflowed the whole bar.
-      count.textContent = 'Showing ' + shown + ' of ' + allRows.length;
       none.hidden = (shown !== 0);
     }
 
@@ -521,53 +570,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // way. Canonicalise both sides to an abbreviation before matching, or a closed center
   // silently shows its normal opening hours. Unlisted names fall back to matching
   // themselves, so a ninth center degrades gracefully.
-  var ALIASES = {
-    'washington heights': 'WH',
-    'cornell tech': 'CT',
-    'andrew freedman home': 'AFH',
-    'hudson yards': 'HY',
-    'manhattan: hudson yards': 'HY',
-    'manhattan': 'HY',
-    'd13': 'D13',
-    'school district 13': 'D13',
-    'district 13 stem center': 'D13',
-    'district 13 brooklyn': 'D13',
-    'qpl far rockaway': 'FR',
-    'far rockaway': 'FR',
-    'qpl jamaica central': 'JA',
-    'jamaica': 'JA',
-    'qpl cambria heights': 'CH',
-    'cambria heights': 'CH',
-    'brooklyn: district 13': 'D13',
-    'cambria heights: qpl': 'CH',
-    'far rockaway: qpl': 'FR',
-    'jamaica: qpl': 'JA',
-    'roosevelt island: cornell tech': 'CT',
-    'south bronx: andrew freedman home': 'AFH',
-    'washington heights: nypl': 'WH'
-  };
-  function ckey(s) {
-    var k = String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
-    return ALIASES[k] || k;
-  }
 
   // Card order, matching the nav menu on the internal site. Done here rather than with a
   // CMS sort field, because adding a field is a collection structure change and that
   // blocks Webflow's publish-one-item-at-a-time, forcing a full site publish.
   var ORDER = ['D13','CH','FR','JA','HY','CT','AFH','WH'];
 
-  // Public-facing name overrides, keyed on the canonical abbreviation. Lets a card read
-  // differently from the CMS item name without editing items we do not own.
-  var DISPLAY = {
-    'D13': 'Brooklyn: District 13',
-    'CH':  'Cambria Heights: QPL',
-    'FR':  'Far Rockaway: QPL',
-    'JA':  'Jamaica: QPL',
-    'HY':  'Manhattan: Hudson Yards',
-    'CT':  'Roosevelt Island: Cornell Tech',
-    'AFH': 'South Bronx: Andrew Freedman Home',
-    'WH':  'Washington Heights: NYPL'
-  };
 
   // Each centre's own page. Jamaica's URL is /jc, not /ja.
   var SLUG = {
