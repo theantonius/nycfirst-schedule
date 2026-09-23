@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 18:17 */
+/* schedule build: 2026-09-23 18:24 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -8,15 +8,15 @@
 .month-card { background:#fff; border:1px solid #D3D1C7; border-radius:12px;
   padding:4px 20px 8px 20px; }
 
-.month-head { font-size:16px; font-weight:500; color:#2C2C2A; letter-spacing:0;
-  padding-top:14px; padding-bottom:8px; }
+.month-head { font-family:inherit; font-size:23px; font-weight:600; color:#231F20;
+  letter-spacing:0; line-height:1.25; padding-top:16px; padding-bottom:10px; }
 
 /* ---- Option C row ---- */
 .c-row { display:flex; flex-direction:row; gap:14px; align-items:stretch;
   padding-top:10px; padding-bottom:10px; border-top:1px solid #D3D1C7; }
 
 .c-stripe { flex:0 0 4px; width:4px; border-radius:999px; background:#9AA0A6; }
-.c-row.is-event  .c-stripe { background:#1D6FD0; }
+.c-row.is-event  .c-stripe { background:#009CD6; }
 .c-row.is-closed .c-stripe { background:#D92D20; }
 .c-row.is-alt    .c-stripe { background:#F5C542; }
 
@@ -25,39 +25,46 @@
 .c-top { display:flex; flex-direction:row; flex-wrap:wrap; gap:8px;
   align-items:center; justify-content:flex-start; }
 
-.c-when { font-size:13px; font-weight:700; letter-spacing:0.6px; color:#5F5E5A;
-  text-transform:uppercase; line-height:1.3; }
+/* Compact metadata keeps the uppercase treatment the filter chips already use. */
+.c-when { font-family:inherit; font-size:14px; font-weight:700; letter-spacing:0.6px;
+  color:#5F5E5A; text-transform:uppercase; line-height:1.3; }
 
-.c-pill { flex:0 0 auto; white-space:nowrap; font-size:12px; font-weight:700;
-  text-transform:uppercase; letter-spacing:0.6px; line-height:1.2;
-  border-radius:999px; padding:5px 12px; color:#fff; background:#9AA0A6; }
-.c-row.is-event  .c-pill { background:#1D6FD0; color:#fff; }
+.c-pill { flex:0 0 auto; white-space:nowrap; font-family:inherit; font-size:13px;
+  font-weight:700; text-transform:uppercase; letter-spacing:0.6px; line-height:1.2;
+  border-radius:999px; padding:6px 14px; color:#fff; background:#9AA0A6; }
+.c-row.is-event  .c-pill { background:#0066B3; color:#fff; }
 .c-row.is-closed .c-pill { background:#D92D20; color:#fff; }
 .c-row.is-alt    .c-pill { background:#F5C542; color:#1A1A1A; }
 
-.c-name { font-size:17px; font-weight:600; color:#2C2C2A; line-height:1.35; }
-.c-sentence { font-size:16px; font-weight:400; color:#2C2C2A; line-height:1.5; }
-.c-loc  { font-size:13px; font-weight:400; color:#6E6C66; }
-.c-addr { font-size:13px; font-weight:400; color:#6E6C66; }
+.c-name { font-family:inherit; font-size:20px; font-weight:600; color:#231F20;
+  line-height:1.3; margin-top:2px; }
+.c-sentence { font-family:inherit; font-size:17px; font-weight:400; color:#231F20;
+  line-height:1.5; }
+.c-loc  { font-family:inherit; font-size:16px; font-weight:400; color:#231F20;
+  line-height:1.4; }
+.c-addr { font-family:inherit; font-size:15px; font-weight:400; color:#5F5E5A;
+  line-height:1.4; }
 
 /* The address is a link but not a headline: neutral ink, a quiet underline, and
    a real colour change on hover so it still reads as clickable. */
 .c-addr a { color:#4A4844; text-decoration:underline;
   text-decoration-color:rgba(74,72,68,0.35); text-underline-offset:2px; }
-.c-addr a:hover { color:#1D6FD0; text-decoration-color:#1D6FD0; }
+.c-addr a:hover { color:#0066B3; text-decoration-color:#0066B3; }
 .c-desc[hidden] { display:none; }
-.c-more { align-self:flex-start; margin-top:2px; padding:0; border:0; background:none;
-  font:inherit; font-size:13px; font-weight:500; color:#1D6FD0; cursor:pointer;
-  text-decoration:underline; text-underline-offset:2px; }
-.c-more:hover { color:#14539c; }
-.c-more:focus-visible { outline:2px solid #1D6FD0; outline-offset:2px; border-radius:3px; }
+.c-more { align-self:flex-start; margin-top:4px; padding:0; border:0; background:none;
+  font:inherit; font-size:16px; font-weight:600; color:#0066B3; cursor:pointer;
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }
+.c-more:hover { color:#004E8A; }
+.c-more:focus-visible { outline:2px solid #0066B3; outline-offset:2px; border-radius:3px; }
 
 /* Keyboard users get the same affordance a mouse user gets on hover. */
-.c-row a:focus-visible, .sc-chip:focus-visible, .sc-select:focus-visible {
-  outline:2px solid #1D6FD0; outline-offset:2px; border-radius:3px; }
-.c-desc a { color:#1D6FD0; text-decoration:underline; }
-.c-desc { font-size:14px; font-weight:400; color:#5F5E5A; line-height:1.6; }
-.c-reg  { font-size:14px; font-weight:500; color:#1D6FD0; text-decoration:underline;
+.c-row a:focus-visible, .c-row button:focus-visible, .sc-chip:focus-visible,
+.sc-select:focus-visible {
+  outline:2px solid #0066B3; outline-offset:2px; border-radius:3px; }
+.c-desc a { color:#0066B3; text-decoration:underline; text-underline-offset:2px; }
+.c-desc { font-family:inherit; font-size:16px; font-weight:400; color:#231F20;
+  line-height:1.6; margin-top:2px; }
+.c-reg  { font-size:16px; font-weight:600; color:#0066B3; text-decoration:underline;
   margin-top:4px; align-self:flex-start; }
 
 @media (max-width:479px) {
@@ -169,7 +176,7 @@
 
 /* Colour comes from the CMS as --tag-color; a tag with no colour set yet
    keeps the neutral pill. Nothing is listed per-code here on purpose. */
-.c-tag { font-size:11px; font-weight:700; letter-spacing:0.6px; line-height:1;
+.c-tag { font-family:inherit; font-size:12px; font-weight:700; letter-spacing:0.6px; line-height:1;
   text-transform:uppercase; padding:5px 9px; border-radius:6px;
   background:var(--tag-color, #EDECE8); color:var(--tag-ink, #5F5E5A); }
 
