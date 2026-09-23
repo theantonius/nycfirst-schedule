@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 17:35';
+var SCHEDULE_BUILD = '2026-09-23 17:38';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -21,6 +21,31 @@ document.addEventListener('DOMContentLoaded', function () {
   var MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
   function txt(el) { return el ? el.textContent.trim() : ''; }
+
+  // Staff type plain text into the description on Monday, so a URL or an email
+  // address arrives as characters, not a link. Build real nodes rather than
+  // assigning innerHTML — the text is staff-entered and must never be parsed
+  // as markup.
+  var LINKIFY = /((?:https?:\/\/|www\.)[^\s<>()]+[^\s<>().,;:!?'"])|([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g;
+  function linkify(el, text) {
+    var last = 0, m;
+    LINKIFY.lastIndex = 0;
+    while ((m = LINKIFY.exec(text)) !== null) {
+      if (m.index > last) el.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var a = document.createElement('a');
+      if (m[2]) {
+        a.href = 'mailto:' + m[2];
+      } else {
+        a.href = /^www\./i.test(m[1]) ? 'https://' + m[1] : m[1];
+        a.target = '_blank';
+        a.rel = 'noopener';
+      }
+      a.textContent = m[0];
+      el.appendChild(a);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) el.appendChild(document.createTextNode(text.slice(last)));
+  }
   function visible(el) { return !!el && el.offsetParent !== null; }
 
   // "2026-09-21" -> a date built in local time, so no UTC day-shift
@@ -252,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       body.appendChild(tags);
     }
-    if (desc)   { var d = document.createElement('div'); d.className = 'c-desc'; d.textContent = desc;   body.appendChild(d); }
+    if (desc)   { var d = document.createElement('div'); d.className = 'c-desc'; linkify(d, desc);       body.appendChild(d); }
 
     if (regEl && regEl.getAttribute('href')) {
       var a = document.createElement('a');
