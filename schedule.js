@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:38';
+var SCHEDULE_BUILD = '2026-09-23 18:44';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -505,22 +505,18 @@ document.addEventListener('DOMContentLoaded', function () {
     var bar = document.createElement('div');
     bar.className = 'sc-filterbar';
 
-    // A header line names what the panel is for and holds the quiet reset. Clear
-    // lives here rather than beside a control so it never reads as part of one axis.
-    var head = document.createElement('div');
-    head.className = 'sc-filterbar-head';
-    var headTitle = document.createElement('span');
-    headTitle.className = 'sc-filterbar-title';
-    headTitle.textContent = 'Filter upcoming updates';
-    head.appendChild(headTitle);
-    bar.appendChild(head);
+    // One row of controls. Everything a visitor usually wants is here; the rest is
+    // behind More filters, opened on request rather than pushed at them every time
+    // the content type changes. The row's height never depends on the selection.
+    var row = document.createElement('div');
+    row.className = 'sc-filterrow';
+    bar.appendChild(row);
 
-    // ---- Show: single select, radio semantics ----
-    var showGroup = group('Show', 'sc-group-show');
+    // ---- content type: single select, radio semantics ----
     var showWrap = document.createElement('div');
     showWrap.className = 'sc-chips';
     showWrap.setAttribute('role', 'radiogroup');
-    showWrap.setAttribute('aria-label', 'Show');
+    showWrap.setAttribute('aria-label', 'Filter by type');
     var showOpts = ['all'];
     if (hasEvents)  showOpts.push('events');
     if (hasChanges) showOpts.push('changes');
@@ -534,9 +530,23 @@ document.addEventListener('DOMContentLoaded', function () {
       b.textContent = SHOW_LABEL[k];
       showWrap.appendChild(b);
     });
-    showGroup.appendChild(showWrap);
-    // With only one kind of content on the page there is nothing to choose between.
-    if (showOpts.length > 2) bar.appendChild(showGroup);
+    if (showOpts.length > 2) row.appendChild(showWrap);
+
+    // ---- STEM Center: always in the same place, in every mode ----
+    var sel = document.createElement('select');
+    sel.className = 'sc-select';
+    sel.setAttribute('aria-label', 'Filter by STEM Center');
+    var opt0 = document.createElement('option');
+    opt0.value = '';
+    opt0.textContent = 'All STEM Centers';
+    sel.appendChild(opt0);
+    centres.forEach(function (c) {
+      var o = document.createElement('option');
+      o.value = c.code;
+      o.textContent = c.label;
+      sel.appendChild(o);
+    });
+    if (centres.length) row.appendChild(sel);
 
     // ---- Program: multi select, OR within the axis ----
     var progGroup = group('Program', 'sc-group-prog');
@@ -545,13 +555,13 @@ document.addEventListener('DOMContentLoaded', function () {
     programsPresent.forEach(function (pr) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'sc-chip is-prog prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      b.className = 'sc-chip is-prog';
       b.setAttribute('data-prog', pr);
       b.setAttribute('role', 'checkbox');
       b.setAttribute('aria-checked', 'false');
       b.textContent = pr;
       var cmeta = TAG_META[pr] || {};
-      if (cmeta.name)  b.title = cmeta.name;
+      if (cmeta.name) b.title = cmeta.name;
       progWrap.appendChild(b);
     });
     progGroup.appendChild(progWrap);
@@ -568,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function () {
     schedOpts.forEach(function (k) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'sc-chip sc-radio' + (k === 'all' ? '' : ' is-' + k);
+      b.className = 'sc-chip sc-radio';
       b.setAttribute('role', 'radio');
       b.setAttribute('data-sched', k);
       b.setAttribute('aria-checked', k === 'all' ? 'true' : 'false');
@@ -577,42 +587,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     schedGroup.appendChild(schedWrap);
 
-    // ---- STEM Center: always visible. People think in places first. ----
-    var centreGroup = group('STEM Center', 'sc-group-centre');
-    var sel = document.createElement('select');
-    sel.className = 'sc-select';
-    sel.setAttribute('aria-label', 'Filter by STEM Center');
-    var opt0 = document.createElement('option');
-    opt0.value = '';
-    opt0.textContent = 'All STEM Centers';
-    sel.appendChild(opt0);
-    centres.forEach(function (c) {
-      var o = document.createElement('option');
-      o.value = c.code;
-      o.textContent = c.label;
-      sel.appendChild(o);
-    });
-    centreGroup.appendChild(sel);
-    if (centres.length) bar.appendChild(centreGroup);
+    var hasMore = programsPresent.length > 0 || schedOpts.length > 1;
 
-    // Reserved area. It keeps its height whether it holds a filter or the hint,
-    // so choosing a different Show option never reflows the panel.
+    var moreBtn = document.createElement('button');
+    moreBtn.type = 'button';
+    moreBtn.className = 'sc-morebtn';
+    moreBtn.textContent = 'More filters';
+    moreBtn.setAttribute('aria-expanded', 'false');
+    moreBtn.setAttribute('aria-controls', 'sc-more-panel');
+    if (hasMore) row.appendChild(moreBtn);
+
     var more = document.createElement('div');
     more.className = 'sc-more';
+    more.id = 'sc-more-panel';
+    more.hidden = true;
     var moreHint = document.createElement('p');
     moreHint.className = 'sc-hint';
     moreHint.textContent = 'Choose Events or Schedule changes for more filters.';
     more.appendChild(moreHint);
-    if (programsPresent.length) more.appendChild(progGroup);
-    if (schedOpts.length > 1)   more.appendChild(schedGroup);
+    more.appendChild(progGroup);
+    more.appendChild(schedGroup);
     bar.appendChild(more);
 
-    var clear = document.createElement('button');
-    clear.type = 'button';
-    clear.className = 'sc-clear';
-    clear.textContent = 'Clear filters';
-    clear.hidden = true;
-    head.appendChild(clear);
+    // ---- active filters, stated plainly, each one removable ----
+    var summary = document.createElement('div');
+    summary.className = 'sc-summary';
+    summary.hidden = true;
+    bar.appendChild(summary);
 
     var none = document.createElement('div');
     none.className = 'sc-none';
@@ -645,12 +646,56 @@ document.addEventListener('DOMContentLoaded', function () {
         b.setAttribute('aria-checked', state.progs.indexOf(b.getAttribute('data-prog')) > -1 ? 'true' : 'false');
       });
       if (sel.value !== state.centre) sel.value = state.centre;
+
+      // Which contextual axis the panel WOULD show. The panel itself only opens
+      // when the visitor asks, so this never changes the height on its own.
       var showProg  = state.show === 'events'  && programsPresent.length > 0;
       var showSched = state.show === 'changes' && schedOpts.length > 1;
       progGroup.hidden  = !showProg;
       schedGroup.hidden = !showSched;
       moreHint.hidden   = showProg || showSched;
-      clear.hidden = isDefault();
+      renderSummary();
+    }
+
+    // A quiet, removable statement of what is on, so the controls do not have to
+    // stay expanded just to remind anyone what they picked.
+    function renderSummary() {
+      summary.textContent = '';
+      var bits = [];
+      if (state.show !== 'all') bits.push({ kind: 'show', value: state.show, label: SHOW_LABEL[state.show] });
+      if (state.show === 'changes' && state.sched !== 'all') {
+        bits.push({ kind: 'sched', value: state.sched, label: SCHED_LABEL[state.sched] });
+      }
+      if (state.show === 'events') {
+        state.progs.forEach(function (pr) { bits.push({ kind: 'prog', value: pr, label: pr }); });
+      }
+      if (state.centre) {
+        var c = centres.filter(function (x) { return x.code === state.centre; })[0];
+        if (c) bits.push({ kind: 'centre', value: c.code, label: c.label });
+      }
+      summary.hidden = bits.length === 0;
+      if (!bits.length) return;
+
+      bits.forEach(function (bit) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'sc-active';
+        b.setAttribute('data-drop', bit.kind);
+        b.setAttribute('data-value', bit.value);
+        b.textContent = bit.label;
+        var x = document.createElement('span');
+        x.className = 'sc-x';
+        x.setAttribute('aria-hidden', 'true');
+        x.textContent = '\u00d7';
+        b.appendChild(x);
+        b.setAttribute('aria-label', 'Remove filter ' + bit.label);
+        summary.appendChild(b);
+      });
+      var cl = document.createElement('button');
+      cl.type = 'button';
+      cl.className = 'sc-clear';
+      cl.textContent = 'Clear';
+      summary.appendChild(cl);
     }
 
     function writeUrl() {
@@ -727,7 +772,26 @@ document.addEventListener('DOMContentLoaded', function () {
       apply();
     }
 
+    moreBtn.addEventListener('click', function () {
+      var open = more.hidden;
+      more.hidden = !open;
+      moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
     bar.addEventListener('click', function (e) {
+      var drop = e.target.closest ? e.target.closest('.sc-active') : null;
+      if (drop) {
+        var kind = drop.getAttribute('data-drop'), val = drop.getAttribute('data-value');
+        if (kind === 'show')   { state.show = 'all'; state.progs = []; state.sched = 'all'; }
+        if (kind === 'sched')  state.sched = 'all';
+        if (kind === 'centre') state.centre = '';
+        if (kind === 'prog') {
+          var j = state.progs.indexOf(val);
+          if (j > -1) state.progs.splice(j, 1);
+        }
+        apply();
+        return;
+      }
       var hit = e.target.closest ? e.target.closest('.sc-chip, .sc-clear') : null;
       if (!hit) return;
       if (hit.classList.contains('sc-clear')) { reset(); return; }

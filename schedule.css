@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 18:38 */
+/* schedule build: 2026-09-23 18:44 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -119,13 +119,13 @@
    .sc-filters — the events page, not the home page teaser.
    ============================================================ */
 .sc-filterbar, .sc-filterbar * { text-align:left; }
-.sc-filterbar { display:flex; flex-direction:column; gap:14px;
-  background:#FAFAF8; border:1px solid #D3D1C7; border-radius:12px;
-  padding:16px 18px; margin-bottom:16px; max-width:680px; }
+/* A small tool above the content, not a form to complete first: one row of
+   controls, a thin rule under it, and the list starting right after. */
+.sc-filterbar { display:flex; flex-direction:column; gap:8px;
+  border-bottom:1px solid #E5E3DC; padding:0 0 10px 0; margin:0 0 12px 0;
+  max-width:680px; }
 
-.sc-filterbar-head { display:flex; align-items:baseline; justify-content:space-between;
-  gap:12px; }
-.sc-filterbar-title { font:inherit; font-size:16px; font-weight:600; color:#231F20; }
+.sc-filterrow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 
 .sc-chips { display:flex; flex-wrap:wrap; gap:8px; }
 
@@ -188,8 +188,8 @@
    before working out what pressing it does. Groups stack; chips inside wrap. */
 .sc-group { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
 .sc-group[hidden] { display:none; }
-.sc-label { font:inherit; font-size:14px; font-weight:600; color:#5F5E5A;
-  flex:0 0 auto; min-width:104px; }
+.sc-label { font:inherit; font-size:13px; font-weight:600; color:#5F5E5A;
+  flex:0 0 auto; }
 
 /* A single-select chip reads as a segment: square-ish ends, joined feel. A
    multi-select programme chip keeps the pill shape. Different shape, different
@@ -199,18 +199,39 @@
 .sc-chip[aria-checked="true"], .sc-chip[aria-pressed="true"] {
   background:#E7F1F9; border-color:#0066B3; color:#0066B3; font-weight:600; }
 
-.sc-clear { font:inherit; font-size:14px; font-weight:500; color:#0066B3;
+.sc-summary { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.sc-summary[hidden] { display:none; }
+.sc-active { font:inherit; font-size:13px; font-weight:500; color:#0066B3;
+  background:#E7F1F9; border:1px solid #CFE3F3; border-radius:999px;
+  padding:3px 8px 3px 10px; cursor:pointer; display:inline-flex; align-items:center;
+  gap:6px; }
+.sc-active:hover { background:#D9EAF7; }
+.sc-active:focus-visible { outline:2px solid #0066B3; outline-offset:2px; }
+.sc-x { font-size:14px; line-height:1; opacity:0.7; }
+
+.sc-clear { font:inherit; font-size:13px; font-weight:500; color:#5F5E5A;
   background:none; border:0; padding:0; cursor:pointer; text-decoration:underline;
   text-underline-offset:3px; }
-.sc-clear:hover { color:#004E8A; }
+.sc-clear:hover { color:#231F20; }
 .sc-clear:focus-visible { outline:2px solid #0066B3; outline-offset:2px; border-radius:3px; }
 
 .sc-none { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.sc-none[hidden] { display:none; }
 
 /* Reserved contextual area: a min-height means swapping Program for Schedule type,
    or for the hint, never changes the panel's overall shape. */
-.sc-more { min-height:40px; display:flex; align-items:center; }
-.sc-hint { font:inherit; font-size:14px; color:#8A8880; margin:0; }
+.sc-morebtn { font:inherit; font-size:14px; font-weight:500; color:#5F5E5A;
+  background:none; border:0; padding:4px 2px; margin-left:auto; cursor:pointer;
+  text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+.sc-morebtn:hover { color:#231F20; }
+.sc-morebtn[aria-expanded="true"] { color:#0066B3; }
+.sc-morebtn:focus-visible { outline:2px solid #0066B3; outline-offset:2px; border-radius:3px; }
+
+/* Collapsed by default; opens only on request, so the row above never moves. */
+.sc-more { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+  padding:8px 0 2px 0; }
+.sc-more[hidden] { display:none; }
+.sc-hint { font:inherit; font-size:13px; color:#8A8880; margin:0; }
 .sc-hint[hidden] { display:none; }
 
 .sc-chips-prog { display:flex; flex-wrap:wrap; gap:8px; }
