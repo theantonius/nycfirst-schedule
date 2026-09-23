@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 18:53 */
+/* schedule build: 2026-09-23 18:58 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -122,10 +122,18 @@
 /* One compact toolbar, aligned to the same column as the cards, sitting directly
    above them. Sentence case, site blue, square-ish corners — nothing about it
    should read as a separate component library. */
-.sc-filterbar { max-width:680px; margin:0 0 10px 0; padding:0 0 8px 0;
-  border-bottom:1px solid #E5E3DC; }
+.sc-filterbar { max-width:680px; margin:0 0 18px 0; padding:0;
+  display:flex; flex-direction:column; gap:9px; }
 
 .sc-filterrow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+
+/* Location, Program and Clear each keep their place. A control that does not
+   apply is hidden with visibility, not display, so the row's geometry is the
+   same in every state and nothing shifts when the type changes. */
+.sc-filterrow-2 > .is-off { visibility:hidden; }
+.sc-filterrow-2 .sc-select-loc  { flex:0 0 260px; width:260px; }
+.sc-filterrow-2 .sc-select-prog { flex:0 0 200px; width:200px; }
+.sc-filterrow-2 .sc-clear { margin-left:auto; }
 
 .sc-chips { display:flex; flex-wrap:wrap; gap:8px; }
 
@@ -137,13 +145,16 @@
 /* Dropdowns match the chips: same height, same border, same corner radius. */
 .sc-select { font:inherit; font-size:14px; padding:7px 10px; border-radius:6px;
   border:1px solid #D3D1C7; background:#fff; color:#231F20; max-width:100%; }
-.sc-select[hidden] { display:none; }
+
 
 .sc-none { background:#F3F2EE; border:1px solid #D3D1C7; border-radius:12px;
   padding:16px 20px; font-size:15px; color:#5F5E5A; max-width:680px; }
 
 @media (max-width:479px) {
-    .sc-chip { font-size:12px; padding:7px 12px; }
+  .sc-chip { font-size:13px; padding:7px 10px; }
+  .sc-filterrow-2 .sc-select-loc,
+  .sc-filterrow-2 .sc-select-prog { flex:1 1 100%; width:100%; }
+  .sc-filterrow-2 .sc-clear { margin-left:0; }
 }
 
 /* ---- teaser (home page): flat list, so no card wrapper to sit inside ---- */
@@ -187,7 +198,6 @@
 
 
 .sc-clear { font:inherit; font-size:14px; font-weight:500; color:#5F5E5A;
-  margin-left:4px;
   background:none; border:0; padding:0; cursor:pointer; text-decoration:underline;
   text-underline-offset:3px; }
 .sc-clear:hover { color:#231F20; }

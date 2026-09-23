@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:53';
+var SCHEDULE_BUILD = '2026-09-23 18:58';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -510,6 +510,10 @@ document.addEventListener('DOMContentLoaded', function () {
     row.className = 'sc-filterrow';
     bar.appendChild(row);
 
+    var row2 = document.createElement('div');
+    row2.className = 'sc-filterrow sc-filterrow-2';
+    bar.appendChild(row2);
+
     // ---- kind: one flat, mutually exclusive set ----
     var kindWrap = document.createElement('div');
     kindWrap.className = 'sc-chips';
@@ -532,11 +536,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ---- location: centres and off-site venues, grouped ----
     var locSel = document.createElement('select');
-    locSel.className = 'sc-select';
+    locSel.className = 'sc-select sc-select-loc';
     locSel.setAttribute('aria-label', 'Filter by location');
     var locAll = document.createElement('option');
     locAll.value = '';
-    locAll.textContent = 'All locations';
+    locAll.textContent = 'Filter by location';
     locSel.appendChild(locAll);
     function addLocGroup(label, list) {
       if (!list.length) return;
@@ -556,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     addLocGroup('STEM Centers', centreLocs);
     addLocGroup('Other locations', otherLocs);
-    if (locs.length) row.appendChild(locSel);
+    if (locs.length) row2.appendChild(locSel);
 
     // ---- program: events only ----
     var progSel = document.createElement('select');
@@ -564,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function () {
     progSel.setAttribute('aria-label', 'Filter by program');
     var progAll = document.createElement('option');
     progAll.value = '';
-    progAll.textContent = 'All programs';
+    progAll.textContent = 'Filter by program';
     progSel.appendChild(progAll);
     programsPresent.forEach(function (pr) {
       var o = document.createElement('option');
@@ -572,15 +576,13 @@ document.addEventListener('DOMContentLoaded', function () {
       o.textContent = (TAG_META[pr] || {}).name || pr;
       progSel.appendChild(o);
     });
-    progSel.hidden = true;
-    if (programsPresent.length) row.appendChild(progSel);
+    if (programsPresent.length) row2.appendChild(progSel);
 
     var clear = document.createElement('button');
     clear.type = 'button';
     clear.className = 'sc-clear';
-    clear.textContent = 'Clear filters';
-    clear.hidden = true;
-    row.appendChild(clear);
+    clear.textContent = 'Clear';
+    row2.appendChild(clear);
 
     var none = document.createElement('div');
     none.className = 'sc-none';
@@ -609,8 +611,11 @@ document.addEventListener('DOMContentLoaded', function () {
       if (progSel.value !== state.prog) progSel.value = state.prog;
       // Program belongs to events. It is the one control that comes and goes, and it
       // sits at the end of the row so nothing else moves when it does.
-      progSel.hidden = !(state.kind === 'event' && programsPresent.length);
-      clear.hidden = isDefault();
+      var wantProg = state.kind === 'event' && programsPresent.length > 0;
+      progSel.classList.toggle('is-off', !wantProg);
+      progSel.disabled = !wantProg;
+      clear.classList.toggle('is-off', isDefault());
+      clear.disabled = isDefault();
     }
 
     function writeUrl() {
