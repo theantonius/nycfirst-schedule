@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:01';
+var SCHEDULE_BUILD = '2026-09-23 18:04';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -126,7 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
   // bolted onto all of them. Anything not listed falls back to "due to <reason>",
   // and Other, which publishes as Unforeseen Circumstances, is left unsaid: the
   // label exists so nobody has to explain something private in public.
-  var REASON_PHRASE = {
+  // A closure reads "closed for staff training"; a change of hours reads "due to
+  // staff training". Same reason, different preposition, so each type gets its own
+  // wording. Other, which publishes as Unforeseen Circumstances, stays unsaid: the
+  // label exists so nobody has to explain something private in public.
+  var REASON_CLOSED = {
     'holiday': 'for the holiday',
     'weather': 'due to weather',
     'event': 'for an event',
@@ -136,10 +140,21 @@ document.addEventListener('DOMContentLoaded', function () {
     'build session': 'for a build session',
     'unforeseen circumstances': ''
   };
-  function reasonPhrase(reason) {
+  var REASON_ALT = {
+    'holiday': 'due to the holiday',
+    'weather': 'due to weather',
+    'event': 'due to an event',
+    'maintenance': 'due to building maintenance',
+    'staff training': 'due to staff training',
+    'event setup': 'due to event setup',
+    'build session': 'due to a build session',
+    'unforeseen circumstances': ''
+  };
+  function reasonPhrase(reason, type) {
     var key = String(reason || '').trim().toLowerCase();
     if (!key) return '';
-    if (Object.prototype.hasOwnProperty.call(REASON_PHRASE, key)) return REASON_PHRASE[key];
+    var map = type === 'closed' ? REASON_CLOSED : REASON_ALT;
+    if (Object.prototype.hasOwnProperty.call(map, key)) return map[key];
     return 'due to ' + reason;
   }
 
@@ -320,15 +335,16 @@ document.addEventListener('DOMContentLoaded', function () {
       // The CMS carries the short centre name; the cards carry the location-first
       // one. DISPLAY is the single source for the public wording, so use it here too.
       var display = DISPLAY[ckey(place)] || place;
-      var phrase = reasonPhrase(desc);
+      var phrase = reasonPhrase(desc, type);
       var sentence;
       if (type === 'closed') {
         sentence = (display || 'This STEM Center') + ' will be closed';
       } else {
         sentence = (display || 'This STEM Center') + ' will be open' +
-                   (hours ? ' ' + sentenceHours(hours) : '');
+                   (hours ? ' ' + sentenceHours(hours) : '') +
+                   ' instead of its regular hours';
       }
-      if (phrase) sentence += ' ' + phrase;
+      if (phrase) sentence += (type === 'closed' ? ' ' : ', ') + phrase;
       sentence += '.';
       var sen = document.createElement('div');
       sen.className = 'c-sentence';
