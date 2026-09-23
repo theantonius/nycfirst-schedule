@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:24';
+var SCHEDULE_BUILD = '2026-09-23 18:32';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -445,99 +445,242 @@ document.addEventListener('DOMContentLoaded', function () {
   var host = list.closest && list.closest('.sc-filters');
   if (host) {
     var allRows = [].slice.call(stack.querySelectorAll('.c-row'));
-    var TYPE_LABEL = { event: 'All Events', closed: 'Closures', alt: 'Alt Hours' };
-    var typesPresent = [], centresPresent = [], programsPresent = [];
 
+    // Three axes, and each one is a different KIND of question, so each gets its
+    // own labelled control rather than another row of identical chips:
+    //   Show          - one of all / events / changes        (single select)
+    //   Program       - any of the approved tags             (multi, OR)
+    //   Schedule type - one of all / closed / alt            (single select)
+    //   STEM Center   - one centre                           (single select)
+    // Program only exists for events and Schedule type only for schedule changes,
+    // so each is shown only when it can do anything, and its value is cleared when
+    // it is put away. A filter the visitor cannot see must never still be filtering.
+    var SHOW_LABEL = { all: 'All updates', events: 'Events', changes: 'Schedule changes' };
+    var SCHED_LABEL = { all: 'All', closed: 'Closures', alt: 'Alt hours' };
+
+    var typesPresent = [], centreValues = [], progsOnPage = [];
     allRows.forEach(function (r) {
       var ty = r.getAttribute('data-type'), ce = r.getAttribute('data-center');
       if (ty && typesPresent.indexOf(ty) < 0) typesPresent.push(ty);
-      if (ce && centresPresent.indexOf(ce) < 0) centresPresent.push(ce);
+      if (ce && centreValues.indexOf(ce) < 0) centreValues.push(ce);
       (r.getAttribute('data-programs') || '').split('|').forEach(function (pr) {
-        if (pr && programsPresent.indexOf(pr) < 0) programsPresent.push(pr);
+        if (pr && progsOnPage.indexOf(pr) < 0) progsOnPage.push(pr);
       });
     });
-    programsPresent.sort();
-    centresPresent.sort();
+
+    // Approved tags only. A vetted tag carries a colour from the Tags board; one
+    // still sitting in Pending Review does not. Filtering on that means a typo or a
+    // half-finished tag can never become a public navigation control, while a filter
+    // that would return nothing still never appears.
+    var programsPresent = progsOnPage.filter(function (pr) {
+      return (TAG_META[pr] || {}).color;
+    }).sort();
+
+    // The dropdown speaks the same names the cards do, and anything that is not a
+    // real centre — the off-site catch-all included — is not a place, so it is out.
+    var centres = [];
+    centreValues.forEach(function (ce) {
+      var code = ckey(ce);
+      if (DISPLAY[code] && !centres.some(function (c) { return c.code === code; })) {
+        centres.push({ code: code, value: ce, label: DISPLAY[code] });
+      }
+    });
+    centres.sort(function (a, b) { return a.label.localeCompare(b.label); });
+
+    var hasEvents  = typesPresent.indexOf('event') > -1;
+    var hasChanges = typesPresent.indexOf('closed') > -1 || typesPresent.indexOf('alt') > -1;
+
+    var state = { show: 'all', progs: [], sched: 'all', centre: '' };
+
+    function group(labelText, className) {
+      var g = document.createElement('div');
+      g.className = 'sc-group ' + className;
+      var lab = document.createElement('span');
+      lab.className = 'sc-label';
+      lab.textContent = labelText;
+      g.appendChild(lab);
+      return g;
+    }
 
     var bar = document.createElement('div');
     bar.className = 'sc-bar';
 
-    // chips are built from what is actually on the page, so a type with no
-    // items never offers a filter that returns nothing
-    var chipWrap = document.createElement('div');
-    chipWrap.className = 'sc-chips';
-    ['event', 'closed', 'alt'].forEach(function (ty) {
-      if (typesPresent.indexOf(ty) < 0) return;
-      var b2 = document.createElement('button');
-      b2.type = 'button';
-      b2.className = 'sc-chip is-' + ty;
-      b2.setAttribute('data-type', ty);
-      b2.setAttribute('aria-pressed', 'false');
-      b2.textContent = TYPE_LABEL[ty];
-      chipWrap.appendChild(b2);
+    // ---- Show: single select, radio semantics ----
+    var showGroup = group('Show', 'sc-group-show');
+    var showWrap = document.createElement('div');
+    showWrap.className = 'sc-chips';
+    showWrap.setAttribute('role', 'radiogroup');
+    showWrap.setAttribute('aria-label', 'Show');
+    var showOpts = ['all'];
+    if (hasEvents)  showOpts.push('events');
+    if (hasChanges) showOpts.push('changes');
+    showOpts.forEach(function (k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sc-chip sc-radio';
+      b.setAttribute('role', 'radio');
+      b.setAttribute('data-show', k);
+      b.setAttribute('aria-checked', k === 'all' ? 'true' : 'false');
+      b.textContent = SHOW_LABEL[k];
+      showWrap.appendChild(b);
     });
-    bar.appendChild(chipWrap);
+    showGroup.appendChild(showWrap);
+    // With only one kind of content on the page there is nothing to choose between.
+    if (showOpts.length > 2) bar.appendChild(showGroup);
 
-    var progWrap = null;
-    if (programsPresent.length) {
-      progWrap = document.createElement('div');
-      progWrap.className = 'sc-chips sc-chips-prog';
-      programsPresent.forEach(function (pr) {
-        var b3 = document.createElement('button');
-        b3.type = 'button';
-        b3.className = 'sc-chip is-prog prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        b3.setAttribute('data-prog', pr);
-        b3.setAttribute('aria-pressed', 'false');
-        b3.textContent = pr;
-        var cmeta = TAG_META[pr] || {};
-        if (cmeta.name)  b3.title = cmeta.name;
-        if (cmeta.color) b3.style.setProperty('--tag-color', cmeta.color);
-        progWrap.appendChild(b3);
-      });
-      bar.appendChild(progWrap);
-    }
+    // ---- Program: multi select, OR within the axis ----
+    var progGroup = group('Program', 'sc-group-prog');
+    var progWrap = document.createElement('div');
+    progWrap.className = 'sc-chips sc-chips-prog';
+    programsPresent.forEach(function (pr) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sc-chip is-prog prog-' + pr.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      b.setAttribute('data-prog', pr);
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', 'false');
+      b.textContent = pr;
+      var cmeta = TAG_META[pr] || {};
+      if (cmeta.name)  b.title = cmeta.name;
+      if (cmeta.color) b.style.setProperty('--tag-color', cmeta.color);
+      progWrap.appendChild(b);
+    });
+    progGroup.appendChild(progWrap);
+    if (programsPresent.length) bar.appendChild(progGroup);
 
+    // ---- Schedule type: single select ----
+    var schedGroup = group('Schedule type', 'sc-group-sched');
+    var schedWrap = document.createElement('div');
+    schedWrap.className = 'sc-chips';
+    schedWrap.setAttribute('role', 'radiogroup');
+    schedWrap.setAttribute('aria-label', 'Schedule type');
+    var schedOpts = ['all'];
+    if (typesPresent.indexOf('closed') > -1) schedOpts.push('closed');
+    if (typesPresent.indexOf('alt') > -1)    schedOpts.push('alt');
+    schedOpts.forEach(function (k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sc-chip sc-radio' + (k === 'all' ? '' : ' is-' + k);
+      b.setAttribute('role', 'radio');
+      b.setAttribute('data-sched', k);
+      b.setAttribute('aria-checked', k === 'all' ? 'true' : 'false');
+      b.textContent = SCHED_LABEL[k];
+      schedWrap.appendChild(b);
+    });
+    schedGroup.appendChild(schedWrap);
+    if (schedOpts.length > 1) bar.appendChild(schedGroup);
+
+    // ---- STEM Center: always visible. People think in places first. ----
+    var centreGroup = group('STEM Center', 'sc-group-centre');
     var sel = document.createElement('select');
     sel.className = 'sc-select';
     sel.setAttribute('aria-label', 'Filter by STEM Center');
     var opt0 = document.createElement('option');
     opt0.value = '';
-    opt0.textContent = 'All centers';
+    opt0.textContent = 'All STEM Centers';
     sel.appendChild(opt0);
-    centresPresent.forEach(function (ce) {
+    centres.forEach(function (c) {
       var o = document.createElement('option');
-      o.value = ce;
-      o.textContent = ce;
+      o.value = c.code;
+      o.textContent = c.label;
       sel.appendChild(o);
     });
-    bar.appendChild(sel);
+    centreGroup.appendChild(sel);
+    if (centres.length) bar.appendChild(centreGroup);
 
-    var count = document.createElement('div');
-    count.className = 'sc-count';
-    bar.appendChild(count);
+    var clear = document.createElement('button');
+    clear.type = 'button';
+    clear.className = 'sc-clear';
+    clear.textContent = 'Clear filters';
+    clear.hidden = true;
+    bar.appendChild(clear);
 
     var none = document.createElement('div');
     none.className = 'sc-none';
-    none.textContent = 'Nothing matches those filters.';
+    var noneMsg = document.createElement('span');
+    noneMsg.textContent = 'Nothing matches these filters.';
+    var noneClear = document.createElement('button');
+    noneClear.type = 'button';
+    noneClear.className = 'sc-clear';
+    noneClear.textContent = 'Clear filters';
+    none.appendChild(noneMsg);
+    none.appendChild(noneClear);
     none.hidden = true;
 
     stack.parentNode.insertBefore(bar, stack);
     stack.parentNode.insertBefore(none, stack.nextSibling);
 
-    var active = [], activeProg = [];   // empty means no filter on that axis
+    function isDefault() {
+      return state.show === 'all' && !state.progs.length &&
+             state.sched === 'all' && !state.centre;
+    }
+
+    function syncControls() {
+      [].slice.call(showWrap.children).forEach(function (b) {
+        b.setAttribute('aria-checked', b.getAttribute('data-show') === state.show ? 'true' : 'false');
+      });
+      [].slice.call(schedWrap.children).forEach(function (b) {
+        b.setAttribute('aria-checked', b.getAttribute('data-sched') === state.sched ? 'true' : 'false');
+      });
+      [].slice.call(progWrap.children).forEach(function (b) {
+        b.setAttribute('aria-checked', state.progs.indexOf(b.getAttribute('data-prog')) > -1 ? 'true' : 'false');
+      });
+      if (sel.value !== state.centre) sel.value = state.centre;
+      progGroup.hidden  = state.show !== 'events';
+      schedGroup.hidden = state.show !== 'changes';
+      clear.hidden = isDefault();
+    }
+
+    function writeUrl() {
+      if (!window.history || !history.replaceState) return;
+      var q = [];
+      if (state.show !== 'all')   q.push('show=' + state.show);
+      if (state.progs.length)     q.push('program=' + state.progs.join(',').toLowerCase());
+      if (state.sched !== 'all')  q.push('kind=' + state.sched);
+      if (state.centre)           q.push('center=' + state.centre.toLowerCase());
+      history.replaceState(null, '', location.pathname + (q.length ? '?' + q.join('&') : '') + location.hash);
+    }
+
+    function readUrl() {
+      var q = new URLSearchParams(location.search);
+      var show = q.get('show');
+      if (show && showOpts.indexOf(show) > -1) state.show = show;
+      var kind = q.get('kind');
+      if (kind && schedOpts.indexOf(kind) > -1) state.sched = kind;
+      var centre = (q.get('center') || '').toUpperCase();
+      if (centre && centres.some(function (c) { return c.code === centre; })) state.centre = centre;
+      (q.get('program') || '').split(',').forEach(function (pr) {
+        var code = pr.trim().toUpperCase();
+        if (code && programsPresent.indexOf(code) > -1 && state.progs.indexOf(code) < 0) state.progs.push(code);
+      });
+      // A filter that is not on screen must not filter. Anything the URL asked for
+      // that belongs to a hidden axis is dropped rather than applied invisibly.
+      if (state.show !== 'events')  state.progs = [];
+      if (state.show !== 'changes') state.sched = 'all';
+    }
 
     function apply() {
-      var centre = sel.value, shown = 0;
+      syncControls();
+      var shown = 0;
 
       allRows.forEach(function (r) {
-        var okType = !active.length || active.indexOf(r.getAttribute('data-type')) > -1;
-        var okCentre = !centre || r.getAttribute('data-center') === centre;
-        // a row matches if it carries ANY of the selected programmes
+        var ty = r.getAttribute('data-type');
+        var isChange = ty === 'closed' || ty === 'alt';
+
+        var okShow = state.show === 'all' ||
+                     (state.show === 'events'  && ty === 'event') ||
+                     (state.show === 'changes' && isChange);
+
+        var okSched = state.show !== 'changes' || state.sched === 'all' || ty === state.sched;
+
+        // OR within the programme axis, AND across axes
         var rowProgs = (r.getAttribute('data-programs') || '').split('|');
-        var okProg = !activeProg.length || activeProg.some(function (pr) {
-          return rowProgs.indexOf(pr) > -1;
-        });
-        var show = okType && okCentre && okProg;
+        var okProg = state.show !== 'events' || !state.progs.length ||
+                     state.progs.some(function (pr) { return rowProgs.indexOf(pr) > -1; });
+
+        var okCentre = !state.centre || ckey(r.getAttribute('data-center') || '') === state.centre;
+
+        var show = okShow && okSched && okProg && okCentre;
         r.style.display = show ? '' : 'none';
         if (show) shown++;
       });
@@ -550,26 +693,49 @@ document.addEventListener('DOMContentLoaded', function () {
         card.style.display = any ? '' : 'none';
       });
 
-      // One constant phrasing. Switching between "4 items" and "Showing 1 of 4"
-      // changed the width of this element, which reflowed the whole bar.
       none.hidden = (shown !== 0);
+      writeUrl();
     }
 
-    function toggle(list, value, el) {
-      var i = list.indexOf(value);
-      if (i > -1) { list.splice(i, 1); el.setAttribute('aria-pressed', 'false'); }
-      else { list.push(value); el.setAttribute('aria-pressed', 'true'); }
+    function reset() {
+      state.show = 'all';
+      state.progs = [];
+      state.sched = 'all';
+      state.centre = '';
       apply();
     }
 
     bar.addEventListener('click', function (e) {
-      var hit = e.target.closest ? e.target.closest('.sc-chip') : null;
+      var hit = e.target.closest ? e.target.closest('.sc-chip, .sc-clear') : null;
       if (!hit) return;
-      if (hit.hasAttribute('data-prog')) toggle(activeProg, hit.getAttribute('data-prog'), hit);
-      else toggle(active, hit.getAttribute('data-type'), hit);
+      if (hit.classList.contains('sc-clear')) { reset(); return; }
+
+      if (hit.hasAttribute('data-show')) {
+        state.show = hit.getAttribute('data-show');
+        // Switching axis puts the other one away, so clear what it was holding.
+        if (state.show !== 'events')  state.progs = [];
+        if (state.show !== 'changes') state.sched = 'all';
+      } else if (hit.hasAttribute('data-sched')) {
+        state.sched = hit.getAttribute('data-sched');
+      } else if (hit.hasAttribute('data-prog')) {
+        var pr = hit.getAttribute('data-prog');
+        var i = state.progs.indexOf(pr);
+        if (i > -1) state.progs.splice(i, 1); else state.progs.push(pr);
+      }
+      apply();
     });
 
-    sel.addEventListener('change', apply);
+    noneClear.addEventListener('click', reset);
+
+    sel.addEventListener('change', function () { state.centre = sel.value; apply(); });
+
+    window.addEventListener('popstate', function () {
+      state.show = 'all'; state.progs = []; state.sched = 'all'; state.centre = '';
+      readUrl();
+      apply();
+    });
+
+    readUrl();
     apply();
   }
 
