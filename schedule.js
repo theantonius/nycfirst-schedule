@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 18:10';
+var SCHEDULE_BUILD = '2026-09-23 18:12';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -386,14 +386,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ml.rel = 'noopener';
         ml.textContent = addr;
         ad.appendChild(ml);
-        ad.appendChild(document.createTextNode(' \u00b7 '));
-        var vm = document.createElement('a');
-        vm.href = mapHref;
-        vm.target = '_blank';
-        vm.rel = 'noopener';
-        vm.className = 'c-maplink';
-        vm.textContent = 'View map';
-        ad.appendChild(vm);
       } else {
         ad.textContent = addr;
       }
@@ -403,7 +395,28 @@ document.addEventListener('DOMContentLoaded', function () {
     // A closure or alt-hours row publishes its reason as the announcement, and the
     // title already reads "Closed - <reason>". Printing it again just repeats it,
     // so only events carry a description line.
-    if (desc && type === 'event') { var d = document.createElement('div'); d.className = 'c-desc'; linkify(d, desc); body.appendChild(d); }
+    if (desc && type === 'event') {
+      var d = document.createElement('div');
+      d.className = 'c-desc';
+      linkify(d, desc);
+      body.appendChild(d);
+      // Threshold rather than measured height: no layout read, no flash of the
+      // full text, and it errs toward leaving short descriptions alone.
+      if (desc.length > 160) {
+        d.classList.add('is-clamped');
+        var more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'c-more';
+        more.textContent = 'Read more';
+        more.setAttribute('aria-expanded', 'false');
+        more.addEventListener('click', function () {
+          var open = d.classList.toggle('is-clamped') === false;
+          more.textContent = open ? 'Show less' : 'Read more';
+          more.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        body.appendChild(more);
+      }
+    }
 
     if (regEl && regEl.getAttribute('href')) {
       var a = document.createElement('a');
