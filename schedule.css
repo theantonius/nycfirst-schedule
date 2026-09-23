@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 19:04 */
+/* schedule build: 2026-09-23 19:12 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -119,6 +119,31 @@
    Filter bar. Only rendered when the Upcoming wrapper carries
    .sc-filters — the events page, not the home page teaser.
    ============================================================ */
+
+/* ------------------------------------------------------------
+   Why the cards used to change width.
+   The Webflow section that hosts this feature, .lead-2.sc-filters, is
+   display:flex; flex-direction:column; align-items:center. On a column flex
+   container, align-items:center replaces the default stretch, so every child
+   is shrink-to-fit. .upcoming-wrapper has no width of its own, so it sized to
+   its content — the widest VISIBLE row. Filtering rows out narrowed the
+   wrapper, and the month cards inside it followed.
+   The fix is to stop the shared ancestor's children being content-sized: one
+   content column, claimed explicitly, for the toolbar, the results and the
+   empty state alike.
+   ------------------------------------------------------------ */
+.sc-filters > .sc-filterbar,
+.sc-filters > .upcoming-wrapper,
+.sc-filters > .sc-none {
+  align-self:stretch;
+  width:100%;
+  max-width:680px;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box;
+}
+.sc-filters > .upcoming-wrapper > .month-stack { width:100%; max-width:none; }
+
 .sc-filterbar, .sc-filterbar * { text-align:left; }
 /* One compact toolbar, aligned to the same column as the cards, sitting directly
    above them. Sentence case, site blue, square-ish corners — nothing about it
