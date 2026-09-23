@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-23 19:12 */
+/* schedule build: 2026-09-23 19:25 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -75,30 +75,34 @@
 }
 
 /* ============================================================
-   TODAY'S HOURS — unchanged from the previous build.
-   The second script depends on every rule below. Do not drop it.
+   TODAY'S HOURS — retyped to match the event cards: inherited
+   Work Sans, #231F20 ink, the #0066B3 brand blue, #D3D1C7 borders.
+   The second script still depends on every class name below.
    ============================================================ */
 .status-pill { display:inline-block; flex:0 0 auto; white-space:nowrap;
-  font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px;
-  line-height:1.2; border-radius:999px; padding:7px 16px; }
+  font-family:inherit; font-size:13px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.6px; line-height:1.2; border-radius:999px; padding:6px 14px; }
 .status-pill.is-closed  { background:#D92D20; color:#fff; }
 .status-pill.is-alt     { background:#F5C542; color:#1A1A1A; }
-.status-pill.is-event   { background:#1D6FD0; color:#fff; }
+.status-pill.is-event   { background:#0066B3; color:#fff; }
 .status-pill.is-open    { background:#0A8A43; color:#fff; }
 .status-pill.is-special { background:#6B7280; color:#fff; }
 
-.hours-list { display:flex; flex-direction:column; gap:12px; max-width:680px; }
+.hours-list { display:flex; flex-direction:column; gap:16px; width:100%;
+  max-width:680px; box-sizing:border-box; }
 .center-card { background:#fff; border:1px solid #D3D1C7; border-radius:12px; padding:16px 20px; }
 /* align-items:flex-start, not center: a long centre name wraps to two lines and
    the pill should stay level with the first one. min-width:0 lets the name wrap
    at all — without it a flex child refuses to shrink and squashes the pill. */
 .center-card-top { display:flex; flex-direction:row; gap:12px; align-items:flex-start; justify-content:space-between; }
-.center-name-today { font-size:18px; font-weight:500; color:#2C2C2A; min-width:0; }
-.center-detail { font-size:15px; font-weight:400; color:#5F5E5A; line-height:1.5; }
+.center-name-today { font-family:inherit; font-size:20px; font-weight:600; color:#231F20;
+  line-height:1.3; min-width:0; }
+.center-detail { font-family:inherit; font-size:17px; font-weight:400; color:#231F20;
+  line-height:1.5; margin-top:4px; }
 
 @media (max-width:479px) {
-  .center-name-today { font-size:16px; }
-  .center-detail { font-size:14px; }
+  .center-name-today { font-size:18px; }
+  .center-detail { font-size:16px; }
   .status-pill { font-size:12px; padding:6px 12px; letter-spacing:0.6px; }
 }
 
@@ -240,6 +244,6 @@
 .center-card.is-linked { cursor: pointer; transition: background-color .12s ease; }
 .center-card .center-link { color: inherit; text-decoration: none; font-weight: inherit; }
 .center-card.is-linked:hover,
-.center-card.is-linked:focus-within { background-color: #F1F1EF; }
+.center-card.is-linked:focus-within { background-color: #F7F6F3; }
 .center-card.is-linked:hover .center-link { text-decoration: none; }
-.center-card .center-link:focus-visible { outline: 2px solid #007EB5; outline-offset: 2px; }
+.center-card .center-link:focus-visible { outline: 2px solid #0066B3; outline-offset: 2px; }
