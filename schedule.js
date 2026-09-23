@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-23 17:43';
+var SCHEDULE_BUILD = '2026-09-23 17:50';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -62,6 +62,38 @@ document.addEventListener('DOMContentLoaded', function () {
       .replace(/\s+/g, ' ')
       .trim()
       .toUpperCase();
+  }
+
+  // "5:00 pm - 7:00 pm" reads badly mid-sentence. "5-7pm" does not.
+  function sentenceHours(s) {
+    var m = String(s || '').match(/(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)\s*[-\u2013\u2014to]+\s*(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)/i);
+    if (!m) return String(s || '').toLowerCase();
+    var ap = function (x) { return x.toLowerCase().replace(/\./g, ''); };
+    var part = function (h, mins, mer) { return h + (mins && mins !== '00' ? ':' + mins : '') + mer; };
+    var a = ap(m[3]), b = ap(m[6]);
+    // 5-7pm when both ends share a meridiem, 11am-1pm when they do not
+    return (a === b ? part(m[1], m[2], '') : part(m[1], m[2], a)) + '\u2013' + part(m[4], m[5], b);
+  }
+
+  // The Reason dropdown is a mix of causes and occasions, so "due to" cannot be
+  // bolted onto all of them. Anything not listed falls back to "due to <reason>",
+  // and Other, which publishes as Unforeseen Circumstances, is left unsaid: the
+  // label exists so nobody has to explain something private in public.
+  var REASON_PHRASE = {
+    'holiday': 'for the holiday',
+    'weather': 'due to weather',
+    'event': 'for an event',
+    'maintenance': 'due to building maintenance',
+    'staff training': 'for staff training',
+    'event setup': 'for event setup',
+    'build session': 'for a build session',
+    'unforeseen circumstances': ''
+  };
+  function reasonPhrase(reason) {
+    var key = String(reason || '').trim().toLowerCase();
+    if (!key) return '';
+    if (Object.prototype.hasOwnProperty.call(REASON_PHRASE, key)) return REASON_PHRASE[key];
+    return 'due to ' + reason;
   }
 
   function whenLine(start, end, type, hours) {
@@ -238,15 +270,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // A closure or alt-hours row says one thing, so it says it once. The stacked
     // title / centre / reason lines repeated the same words three times over.
     if (type !== 'event') {
-      var reason = desc || '';
+      var phrase = reasonPhrase(desc);
       var sentence;
       if (type === 'closed') {
         sentence = (place || 'This STEM Center') + ' will be closed';
       } else {
         sentence = (place || 'This STEM Center') + ' will be open' +
-                   (hours ? ' ' + tidyHours(hours) : '');
+                   (hours ? ' ' + sentenceHours(hours) : '');
       }
-      if (reason) sentence += ' due to ' + reason;
+      if (phrase) sentence += ' ' + phrase;
       sentence += '.';
       var sen = document.createElement('div');
       sen.className = 'c-sentence';
