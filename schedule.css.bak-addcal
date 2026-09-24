@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-24 16:54 */
+/* schedule build: 2026-09-23 19:25 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -65,17 +65,8 @@
 .c-desc a { color:#0066B3; text-decoration:underline; text-underline-offset:2px; }
 .c-desc { font-family:inherit; font-size:16px; font-weight:400; color:#231F20;
   line-height:1.6; margin-top:2px; }
-/* Register and Add to my calendar sit on one row. One strong blue action per
-   card: Register keeps it, the calendar link takes the quieter address ink so
-   the two do not compete. */
-.c-actions { display:flex; flex-direction:row; flex-wrap:wrap; align-items:baseline;
-  gap:6px 18px; margin-top:6px; }
 .c-reg  { font-size:16px; font-weight:600; color:#0066B3; text-decoration:underline;
-  text-underline-offset:3px; }
-.c-cal  { font-family:inherit; font-size:16px; font-weight:500; color:#5F5E5A;
-  text-decoration:underline; text-decoration-color:rgba(74,72,68,0.35);
-  text-underline-offset:3px; }
-.c-cal:hover { color:#0066B3; text-decoration-color:#0066B3; }
+  margin-top:4px; align-self:flex-start; }
 
 @media (max-width:479px) {
   .c-row { gap:12px; }

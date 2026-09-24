@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-24 16:54';
+var SCHEDULE_BUILD = '2026-09-23 19:25';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -99,50 +99,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function parseYMD(s) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((s || '').trim());
     return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
-  }
-
-  // ---------- Add to my calendar ----------
-  // Builds a Google Calendar template URL from what the row already carries.
-  // Deliberately self-contained: parseRange lives in the SECOND DOMContentLoaded
-  // block below and is not in scope here, so this does its own clock parsing.
-  function pad2(n) { return (n < 10 ? '0' : '') + n; }
-  function ymdCompact(d) {
-    return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
-  }
-  // "5:00 pm" / "10:30am" -> { h, m }, 24-hour. Anything else -> null.
-  function clockParts(s) {
-    var m = /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i.exec((s || '').trim());
-    if (!m) return null;
-    var h = (+m[1]) % 12;
-    if (/pm/i.test(m[3])) h += 12;
-    return { h: h, m: +(m[2] || 0) };
-  }
-  function calendarHref(name, start, end, hours, location, details) {
-    if (!start) return '';
-    // The CMS end date is the last day of the event, the way a person reads it.
-    var last = (end && end.getTime() > start.getTime()) ? end : start;
-    var bits = String(hours || '').split(/\s*[-\u2013\u2014]\s*/);
-    var t1 = clockParts(bits[0]);
-    var t2 = clockParts(bits[1]);
-    var dates;
-    if (t1) {
-      // A start with no end reads as an hour long; never let it spill past midnight.
-      if (!t2) t2 = (t1.h >= 23) ? { h: 23, m: 59 } : { h: t1.h + 1, m: t1.m };
-      dates = ymdCompact(start) + 'T' + pad2(t1.h) + pad2(t1.m) + '00' +
-              '/' + ymdCompact(last) + 'T' + pad2(t2.h) + pad2(t2.m) + '00';
-    } else {
-      // All-day. Google's end date is EXCLUSIVE, the website's is not, so +1 day.
-      var endEx = new Date(last.getTime());
-      endEx.setDate(endEx.getDate() + 1);
-      dates = ymdCompact(start) + '/' + ymdCompact(endEx);
-    }
-    var q = ['action=TEMPLATE',
-             'text=' + encodeURIComponent(name || 'NYC FIRST event'),
-             'dates=' + dates,
-             'ctz=America/New_York'];
-    if (location) q.push('location=' + encodeURIComponent(location));
-    if (details)  q.push('details=' + encodeURIComponent(details));
-    return 'https://calendar.google.com/calendar/render?' + q.join('&');
   }
 
   // "2:00 pm - 6:00 pm" -> "2PM TO 6PM"; "10:30 am - 1:00 pm" -> "10:30AM TO 1PM"
@@ -487,34 +443,14 @@ document.addEventListener('DOMContentLoaded', function () {
       body.insertBefore(more, d);
     }
 
-    // Register and Add to my calendar are both "act on this event", so they share
-    // one row. Read more is a disclosure and stays above, with the text it opens.
-    var regHref = regEl && regEl.getAttribute('href');
-    var calHref = (type === 'event')
-      ? calendarHref(name, start, end, hours, addr || place, desc)
-      : '';
-    if (regHref || calHref) {
-      var acts = document.createElement('div');
-      acts.className = 'c-actions';
-      if (regHref) {
-        var a = document.createElement('a');
-        a.className = 'c-reg';
-        a.href = regHref;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.textContent = 'Register';
-        acts.appendChild(a);
-      }
-      if (calHref) {
-        var cal = document.createElement('a');
-        cal.className = 'c-cal';
-        cal.href = calHref;
-        cal.target = '_blank';
-        cal.rel = 'noopener';
-        cal.textContent = 'Add to my calendar';
-        acts.appendChild(cal);
-      }
-      body.appendChild(acts);
+    if (regEl && regEl.getAttribute('href')) {
+      var a = document.createElement('a');
+      a.className = 'c-reg';
+      a.href = regEl.getAttribute('href');
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = 'Register';
+      body.appendChild(a);
     }
 
     el.appendChild(body);
