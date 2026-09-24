@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-24 17:03';
+var SCHEDULE_BUILD = '2026-09-24 17:31';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -614,11 +614,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var sub = document.createElement('div');
     sub.className = 'sc-subscribe';
 
-    var subLead = document.createElement('span');
-    subLead.className = 'sc-subscribe-lead';
-    subLead.textContent = 'Subscribe to the NYC FIRST events calendar:';
-    sub.appendChild(subLead);
-
     function subLink(label, href) {
       var a = document.createElement('a');
       a.className = 'sc-subscribe-link';
@@ -628,17 +623,21 @@ document.addEventListener('DOMContentLoaded', function () {
       a.textContent = label;
       return a;
     }
-    // Google gets its own handler; everything else subscribes to the same
-    // calendar over the public iCal feed, so neither route makes a copy.
+    function subText(t) { return document.createTextNode(t); }
+
+    // One sentence, three links. Only the platform names are clickable: the
+    // line is a page-level utility, not a call to action, and making the whole
+    // sentence a link would give it the weight of a heading.
+    var ICS = 'calendar.google.com/calendar/ical/' + encodeURIComponent(SC_CAL_ID) + '/public/basic.ics';
+    sub.appendChild(subText('Add the NYC FIRST events calendar to '));
     sub.appendChild(subLink('Google',
       'https://calendar.google.com/calendar/render?cid=' + encodeURIComponent(SC_CAL_ID)));
-    var subSep = document.createElement('span');
-    subSep.className = 'sc-subscribe-sep';
-    subSep.setAttribute('aria-hidden', 'true');
-    subSep.textContent = '\u00b7';
-    sub.appendChild(subSep);
-    sub.appendChild(subLink('Apple or Outlook',
-      'https://calendar.google.com/calendar/ical/' + encodeURIComponent(SC_CAL_ID) + '/public/basic.ics'));
+    sub.appendChild(subText(', '));
+    // webcal:// hands Apple Calendar a subscription rather than a downloaded file.
+    sub.appendChild(subLink('Apple', 'webcal://' + ICS));
+    sub.appendChild(subText(', or '));
+    sub.appendChild(subLink('Outlook', 'https://' + ICS));
+    sub.appendChild(subText('.'));
 
     stack.parentNode.insertBefore(sub, bar);
 

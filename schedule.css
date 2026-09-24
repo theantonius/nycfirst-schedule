@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-24 17:03 */
+/* schedule build: 2026-09-24 17:31 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -70,14 +70,20 @@
 .c-reg  { font-size:16px; font-weight:600; color:#0066B3; text-decoration:underline;
   text-underline-offset:3px; }
 
-/* One subscribe link above the filter panel, sharing the panel's width so the
-   column reads as a single stack. Quiet by default: it is an offer, not the
-   reason anyone came to the page. */
+/* Page-level utility line: sits below the hero, above the filter panel, and is
+   deliberately NOT inside the filter box — it filters nothing. Same width and
+   auto margins as the panel and the cards, so its left edge lines up with
+   theirs. One step smaller than the card body (16px) and regular weight, so it
+   reads as a secondary action rather than a second headline. */
 .sc-subscribe { align-self:stretch; width:100%; max-width:680px;
-  margin:0 auto 10px auto; box-sizing:border-box;
-  display:flex; flex-direction:row; flex-wrap:wrap; align-items:baseline; gap:4px 8px; }
-.sc-subscribe-lead { font-family:inherit; font-size:16px; font-weight:400; color:#5F5E5A; }
-.sc-subscribe-sep { color:#9AA0A6; }
+  margin:0 auto 12px auto; box-sizing:border-box; text-align:left;
+  font-family:inherit; font-size:15px; font-weight:400; line-height:1.5;
+  color:#5F5E5A; }
+.sc-subscribe-link { font:inherit; color:#0066B3; text-decoration:underline;
+  text-underline-offset:3px; }
+.sc-subscribe-link:hover { color:#004E8A; }
+.sc-subscribe-link:focus-visible { outline:2px solid #0066B3; outline-offset:2px;
+  border-radius:3px; }
 .sc-subscribe-link { font-family:inherit; font-size:16px; font-weight:500;
   color:#5F5E5A; text-decoration:underline;
   text-decoration-color:rgba(74,72,68,0.35); text-underline-offset:3px; }
