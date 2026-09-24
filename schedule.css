@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-24 17:36 */
+/* schedule build: 2026-09-24 17:40 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -81,12 +81,23 @@
   margin:0 auto 18px auto; box-sizing:border-box; text-align:left;
   font-family:inherit; font-size:13.5px; font-weight:400; line-height:1.5;
   color:#5F5E5A; }
-.sc-subscribe-link { font:inherit; color:inherit; text-decoration:underline;
-  text-decoration-color:rgba(95,94,90,0.4); text-underline-offset:2px;
-  text-decoration-thickness:1px; }
-.sc-subscribe-link:hover { color:#231F20; text-decoration-color:#231F20; }
-.sc-subscribe-link:focus-visible { outline:2px solid #0066B3; outline-offset:2px;
-  border-radius:3px; }
+/* The three platform names must read as words inside the sentence, not as
+   buttons after it. `font:inherit` alone lost to the host page's own link
+   styling, which is more specific than a single class, so the selector carries
+   the parent class AND the tag, and every property that could differ is stated
+   outright rather than inherited. Underline is the ONLY difference from the
+   surrounding text. */
+.sc-subscribe a.sc-subscribe-link {
+  font-family:inherit; font-size:inherit; font-weight:inherit;
+  font-style:inherit; line-height:inherit; letter-spacing:inherit;
+  text-transform:none; color:inherit; background:none;
+  text-decoration:underline; text-decoration-color:rgba(95,94,90,0.45);
+  text-decoration-thickness:1px; text-underline-offset:2px; }
+/* Hover moves the underline only — never the size, weight or colour of the word. */
+.sc-subscribe a.sc-subscribe-link:hover {
+  color:inherit; text-decoration-color:rgba(35,31,32,0.9); }
+.sc-subscribe a.sc-subscribe-link:focus-visible {
+  outline:2px solid #0066B3; outline-offset:2px; border-radius:3px; }
 .sc-subscribe-link { font-family:inherit; font-size:16px; font-weight:500;
   color:#5F5E5A; text-decoration:underline;
   text-decoration-color:rgba(74,72,68,0.35); text-underline-offset:3px; }
