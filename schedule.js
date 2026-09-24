@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-24 17:31';
+var SCHEDULE_BUILD = '2026-09-24 17:36';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -637,7 +637,6 @@ document.addEventListener('DOMContentLoaded', function () {
     sub.appendChild(subLink('Apple', 'webcal://' + ICS));
     sub.appendChild(subText(', or '));
     sub.appendChild(subLink('Outlook', 'https://' + ICS));
-    sub.appendChild(subText('.'));
 
     stack.parentNode.insertBefore(sub, bar);
 

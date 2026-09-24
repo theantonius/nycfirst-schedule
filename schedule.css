@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-24 17:31 */
+/* schedule build: 2026-09-24 17:36 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -70,18 +70,21 @@
 .c-reg  { font-size:16px; font-weight:600; color:#0066B3; text-decoration:underline;
   text-underline-offset:3px; }
 
-/* Page-level utility line: sits below the hero, above the filter panel, and is
-   deliberately NOT inside the filter box — it filters nothing. Same width and
-   auto margins as the panel and the cards, so its left edge lines up with
-   theirs. One step smaller than the card body (16px) and regular weight, so it
-   reads as a secondary action rather than a second headline. */
+/* Page-level utility line: below the hero, above the filter panel, and
+   deliberately outside the filter box — it filters nothing. Same width and auto
+   margins as the panel and the cards so the left edges line up.
+   Quiet on purpose: smaller than the card body, regular weight, and the links
+   take the sentence's own ink rather than the brand blue. They stay underlined
+   so they still read as links, but at reduced contrast so they do not compete
+   with the filter controls directly beneath. */
 .sc-subscribe { align-self:stretch; width:100%; max-width:680px;
-  margin:0 auto 12px auto; box-sizing:border-box; text-align:left;
-  font-family:inherit; font-size:15px; font-weight:400; line-height:1.5;
+  margin:0 auto 18px auto; box-sizing:border-box; text-align:left;
+  font-family:inherit; font-size:13.5px; font-weight:400; line-height:1.5;
   color:#5F5E5A; }
-.sc-subscribe-link { font:inherit; color:#0066B3; text-decoration:underline;
-  text-underline-offset:3px; }
-.sc-subscribe-link:hover { color:#004E8A; }
+.sc-subscribe-link { font:inherit; color:inherit; text-decoration:underline;
+  text-decoration-color:rgba(95,94,90,0.4); text-underline-offset:2px;
+  text-decoration-thickness:1px; }
+.sc-subscribe-link:hover { color:#231F20; text-decoration-color:#231F20; }
 .sc-subscribe-link:focus-visible { outline:2px solid #0066B3; outline-offset:2px;
   border-radius:3px; }
 .sc-subscribe-link { font-family:inherit; font-size:16px; font-weight:500;
