@@ -1,3 +1,84 @@
+# v1.1 — Launch-day updates
+
+Released September 25, 2026
+
+Changes made on launch day, after v1.0 went live at 1 pm.
+
+---
+
+## Website
+
+### Upcoming cards keep their width
+
+On the home page, clicking Read more used to make the Upcoming panel wider, and Show less made it shrink again. The panel now keeps one fixed width. Opening a description only makes the card taller.
+
+On phones, the panel keeps a small margin on each side.
+
+### Event stripe matches the program color
+
+The colored bar on the left of each event now uses the event's program color, the same color as its tag. For example, FIRST Tech Challenge events are orange and FIRST LEGO League events are red.
+
+* One program: one solid color.
+* Several programs: the bar is split into equal bands, one per program.
+* No program, or a tag still waiting for review: the standard event blue.
+
+Closures and alternate hours keep their red and amber bars.
+
+Colors come from the Tags board in Monday.com, so changing a program color needs no website change.
+
+### Program filter is always available
+
+Filter by program is now always visible on the events page, not only when Events is selected.
+
+* Choosing a program switches the view to Events and shows only that program's events.
+* Choosing All updates or Closures clears the program.
+* Links that include a program open on the Events view with that program selected.
+
+### Footer events list
+
+The Events list in the site footer now shows upcoming events from the new events system instead of the old events collection.
+
+---
+
+## Behind the scenes
+
+### Calendar invitations for STEM Centers
+
+Each STEM Center's calendar is listed on the Calendars board in Monday.com. When an event at a STEM Center is published, it is added to the shared calendar and the Center's calendar is invited. Staff tagged on the Center or the event are invited too.
+
+Org Wide events invite the calendar listed on the ES row.
+
+Existing events pick up the new invitations the next time they are published or edited.
+
+### Launch-day publishing issue
+
+During launch preparation, publishing many events within a few minutes caused some of them to appear published in Monday.com without reaching the website or calendar. All affected events were republished and checked against the website.
+
+Until the fixes listed below are in place, publish events one at a time, about 40 seconds apart.
+
+---
+
+## Coming next
+
+* **Failure alerts.** Notify staff when an automation fails, instead of the failure going unnoticed.
+* **Automatic repair.** A scheduled check that finds published items missing from the website or calendar and republishes them.
+* **Reliable bulk publishing.** Each run reads only the item that changed, and an empty response from Monday.com counts as a failure instead of a success.
+* **Calendar updates in place.** Update calendar events instead of deleting and recreating them.
+* **Safe duplicating.** A duplicated row gets its own website item and calendar event instead of sharing the original's.
+* **Publishing permissions.** Only selected staff can change Posted on Website and the ID columns.
+* **Type colors decided by staff.** Event, closure and alternate-hours colors in one place, so staff can choose them and closures stay distinct from program colors.
+* **Schedule changes on STEM Center calendars.** Closures and alternate hours are intentionally not sent to calendars yet.
+* **Faster Today's Hours.** Cache the closures feed so a traffic spike does not slow the other automations.
+
+---
+
+## Known limits
+
+**FIRST LEGO League red and closure red**
+The two colors are nearly the same. The EVENT and CLOSURE labels tell them apart until closure colors are decided.
+
+---
+
 # v1.0 — STEM Center Schedule System
 
 Released September 25, 2026
