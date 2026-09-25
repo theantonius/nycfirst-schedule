@@ -1,6 +1,0 @@
-{
-  // Cloudflare Pages project config. deploy.sh builds .cfbuild/ with only
-  // schedule.css and schedule.js, and publishes that folder.
-  "name": "nycfirst-schedule",
-  "pages_build_output_dir": ".cfbuild"
-}

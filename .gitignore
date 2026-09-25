@@ -14,10 +14,12 @@ npm-debug.log*
 # Local environment files
 .env
 .env.*
+!.env.example
 
 # Editor backups and scratch copies
 *.bak
 *.bak-*
+*.backup
 *.orig
 *~
 *.swp

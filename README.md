@@ -19,7 +19,6 @@ The two files are served from **schedule.nycfirst.org** (Cloudflare Pages).
 | `schedule.css`      | Styles for every schedule block. Loaded in `<head>`.                    |
 | `schedule.js`       | Builds the blocks from the CMS markup. Loaded before `</body>`.         |
 | `deploy.sh`         | Commits, pushes, publishes to Cloudflare Pages, and checks it is live.  |
-| `wrangler.jsonc`    | Cloudflare Pages project settings used by the deploy.                   |
 | `package.json`      | Pins Wrangler, the Cloudflare tool that uploads the files.              |
 | `package-lock.json` | Locks the exact Wrangler version so every deploy uses the same one.     |
 | `RELEASE_NOTES.md`  | What changed in each release, written for staff.                        |

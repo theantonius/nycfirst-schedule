@@ -21,7 +21,7 @@ sedi -E "s|^/\* schedule build: .* \*/|/* schedule build: ${STAMP} */|" schedule
 echo "stamped build ${STAMP}"
 
 if [[ -n "$(git status --porcelain)" ]]; then
-  git add -A
+  git add schedule.css schedule.js README.md RELEASE_NOTES.md deploy.sh .gitignore package.json package-lock.json
   git commit -m "$MSG"
 else
   echo "No local changes — publishing anyway."
