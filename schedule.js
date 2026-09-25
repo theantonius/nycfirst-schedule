@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-25 15:14';
+var SCHEDULE_BUILD = '2026-09-25 15:19';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -666,9 +666,9 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       if (locSel.value !== state.loc) locSel.value = state.loc;
       if (progSel.value !== state.prog) progSel.value = state.prog;
-      // Program belongs to events. It is the one control that comes and goes, and it
-      // sits at the end of the row so nothing else moves when it does.
-      var wantProg = state.kind === 'event' && programsPresent.length > 0;
+      // Program is always on screen. It narrows events only; closures and alt
+      // hours carry no programme and are never hidden by it.
+      var wantProg = programsPresent.length > 0;
       progSel.classList.toggle('is-off', !wantProg);
       progSel.disabled = !wantProg;
       clear.classList.toggle('is-off', isDefault());
@@ -692,8 +692,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (loc && locs.some(function (l) { return l.key === loc; })) state.loc = loc;
       var prog = (q.get('program') || '').toUpperCase();
       if (prog && programsPresent.indexOf(prog) > -1) state.prog = prog;
-      // A filter that is not on screen must not filter.
-      if (state.kind !== 'event') state.prog = '';
     }
 
     function apply() {
@@ -708,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // "any of" so multi-select programmes stay a one-line change
         var rowProgs = (r.getAttribute('data-programs') || '').split('|');
         var wanted = state.prog ? [state.prog] : [];
-        var okProg = state.kind !== 'event' || !wanted.length ||
+        var okProg = ty !== 'event' || !wanted.length ||
                      wanted.some(function (pr) { return rowProgs.indexOf(pr) > -1; });
 
         var show = okKind && okLoc && okProg;
@@ -740,7 +738,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!hit) return;
       if (hit.classList.contains('sc-clear')) { reset(); return; }
       state.kind = hit.getAttribute('data-kind');
-      if (state.kind !== 'event') state.prog = '';
       apply();
     });
 
