@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-25 14:26';
+var SCHEDULE_BUILD = '2026-09-25 15:14';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -308,6 +308,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var stripe = document.createElement('span');
     stripe.className = 'c-stripe';
+    // Events take their programme colour from the Tags board, same as the tag
+    // pills. One programme: solid. Several: equal bands, top to bottom, in tag
+    // order. No coloured tag: the default event blue from the CSS. Closures and
+    // alt hours keep their red / amber so a closure always reads as a closure.
+    if (type === 'event') {
+      var stripeCols = programs.map(function (pr) { return (TAG_META[pr] || {}).color; })
+                               .filter(Boolean);
+      if (stripeCols.length === 1) {
+        stripe.style.background = stripeCols[0];
+      } else if (stripeCols.length > 1) {
+        var band = 100 / stripeCols.length;
+        stripe.style.background = 'linear-gradient(to bottom,' + stripeCols.map(function (c, i) {
+          return c + ' ' + (i * band) + '%,' + c + ' ' + ((i + 1) * band) + '%';
+        }).join(',') + ')';
+      }
+    }
     el.appendChild(stripe);
 
     var body = document.createElement('div');
