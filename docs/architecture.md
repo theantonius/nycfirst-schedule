@@ -38,6 +38,14 @@ NYC FIRST runs a self-hosted n8n instance at n8n.nycfirst.org. It was launched f
 
 The production workflows keep Webflow, Google Calendar and Monday.com authentication in n8n's credential store. The browser never talks to Monday, Webflow's API or Google Calendar directly.
 
+![Webflow CMS collection next to the public events page](images/07-webflow-cms-output.png)
+
+*Webflow is the public CMS and page layer. Items arrive from Monday.com through n8n and appear on the site.*
+
+![Shared calendar list and a published event](images/08-google-calendar.png)
+
+*Each published event is created once on the shared SC-All calendar.*
+
 ## Design decisions
 
 These are the choices that shape how the system behaves.

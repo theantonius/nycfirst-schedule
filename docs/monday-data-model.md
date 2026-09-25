@@ -14,11 +14,17 @@ Column names below describe each column's role. The workflows reference columns 
 
 Many staff only ever see the forms. A form submission creates a row that is not public until a publisher sets it to Published.
 
+<img src="images/02-monday-event-form.png" alt="Events Submission Form" width="300">
+
 ## Operational boards
 
 ### Events
 
 One row per event.
+
+![Events board](images/03-monday-events-board.png)
+
+*System ID columns (right) are blurred.*
 
 | Column role | Notes |
 | --- | --- |
@@ -40,6 +46,8 @@ One row per event.
 ### Schedule Changes
 
 One row per closure or alternate-hours period.
+
+![Schedule Changes and STEM Center Hours boards](images/04-monday-schedule-data.png)
 
 | Column role | Notes |
 | --- | --- |

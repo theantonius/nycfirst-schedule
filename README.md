@@ -6,6 +6,10 @@ Launched September 25, 2026.
 
 This repository contains the public front-end and deployment code for the larger system. The full system connects Monday.com, n8n, Webflow, Google Calendar and nycfirst.org.
 
+![Webflow CMS collection populated by n8n, next to the public events page it produces](docs/images/07-webflow-cms-output.png)
+
+*Left: the Webflow CMS collection, filled automatically from Monday.com through n8n. Right: the public events page built from it.*
+
 ## What I built
 
 The project started in November 2025 with a simple question: how can someone tell whether a STEM Center is actually open today?
@@ -61,6 +65,14 @@ Webflow provides the CMS and page structure.
 
 This repository provides the browser-side presentation layer used for Today's Hours, Upcoming Events, event filtering and calendar subscription.
 
+![The seven production workflows on NYC FIRST's self-hosted n8n instance](docs/images/05-n8n-workflow-list.png)
+
+*The seven production workflows on NYC FIRST's self-hosted n8n instance.*
+
+![The Events NYCFIRST → Calendar workflow canvas](docs/images/06-n8n-events-workflow.png)
+
+*The main Events workflow: Monday change → Webflow and Google Calendar → IDs written back to Monday.*
+
 ## Staff workflow
 
 A typical event moves through the system like this:
@@ -83,11 +95,36 @@ Future edits update the existing records
 
 Staff do not need to edit the same event separately in Webflow or Google Calendar.
 
+<p>
+  <img src="docs/images/02-monday-event-form.png" alt="Monday.com Events Submission Form" width="300">
+</p>
+
+*Most staff start with a Monday.com form. A submission stays internal until a publisher sets it to Published.*
+
+![Monday.com Events board with publish status and system ID columns](docs/images/03-monday-events-board.png)
+
+*The Events board. The last two columns are the Google Calendar and Webflow IDs n8n writes back (values blurred).*
+
+![Shared SC-All calendar list and a published event](docs/images/08-google-calendar.png)
+
+*Published events land on the shared calendar, alongside the center-specific calendars.*
+
 Closures and alternate hours follow a similar process for the website (they are not currently sent to Google Calendar) and are also exposed through a public read-only n8n feed so Today's Hours can reflect current schedule changes.
+
+![Schedule Changes board above the STEM Center Hours board](docs/images/04-monday-schedule-data.png)
+
+*Exceptions (top) and regular weekly hours (bottom) are maintained separately in Monday.com.*
 
 ## Public interface
 
 The front-end code in this repository provides:
+
+<p>
+  <img src="docs/images/01-public-site.png" alt="Today's Hours on nycfirst.org" width="360">
+  <img src="docs/images/01b-events-page.png" alt="Events page with filters and calendar subscription" width="400">
+</p>
+
+*Today's Hours and the events page on nycfirst.org.*
 
 ### Today's Hours
 

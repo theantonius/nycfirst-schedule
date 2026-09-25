@@ -18,11 +18,15 @@ Webhook URLs, credentials and board identifiers are intentionally left out. Work
 
 Monday webhooks start with a challenge handler, which Monday requires when a webhook is registered.
 
+![The seven production workflows](images/05-n8n-workflow-list.png)
+
 ---
 
 ### Events NYCFIRST → Calendar
 
 Publishes an event to the website and calendars when its publish status changes, and keeps both in sync with later edits.
+
+![Events NYCFIRST → Calendar canvas](images/06-n8n-events-workflow.png)
 
 1. **Receive** the Monday change: which item, which column, which status.
 2. **Load context:** the Events board, the Calendars registry, Monday users (to resolve staff to email addresses), and the item's linked venue, tags and image.
