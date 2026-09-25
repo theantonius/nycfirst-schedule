@@ -1,16 +1,88 @@
 # nycfirst-schedule
 
-Front-end code for the STEM Center hours and schedule blocks on [nycfirst.org](https://www.nycfirst.org).
+Front-end code for the STEM Center hours, schedule changes and events shown on [nycfirst.org](https://www.nycfirst.org).
 
-It is the last step of a larger system:
+This repository is one part of the NYC FIRST STEM Center Schedule System. It contains the browser-side presentation layer — `schedule.js` and `schedule.css` — and the tooling that deploys them. It is **not** the whole system:
 
-```
-Monday.com  →  n8n  →  Webflow CMS / Google Calendar  →  nycfirst.org
-```
-
-Staff enter hours, closures, alternate hours and events in Monday.com. n8n syncs them to the Webflow CMS and Google Calendar. This repository turns what Webflow renders into the blocks visitors see.
+- The n8n workflows that sync and publish data are maintained separately, in n8n.
+- The Monday.com boards and their configuration are maintained separately, in Monday.com.
+- No credentials are stored here.
 
 The two files are served from **schedule.nycfirst.org** (Cloudflare Pages).
+
+## System architecture
+
+```
+Monday.com
+    ↓
+n8n
+    ↓
+Webflow CMS + Google Calendar
+    ↓
+nycfirst.org  ←  schedule.js / schedule.css (this repository)
+```
+
+| Layer             | Responsibility                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------- |
+| Monday.com        | Where staff manage hours, closures, alternate hours, events, venues, tags and calendar settings.             |
+| n8n               | Syncs Monday.com to Webflow and Google Calendar, and serves a public read-only closures feed.                 |
+| Webflow           | The website: CMS collections, pages and layout. Renders the raw data this code reads.                        |
+| Google Calendar   | A shared calendar for all events, plus one calendar per STEM Center.                                         |
+| nycfirst-schedule | Turns what Webflow renders into Today's Hours, Upcoming, the events-page filters and the subscribe links.    |
+| Cloudflare Pages  | Hosts `schedule.js` and `schedule.css` at schedule.nycfirst.org.                                              |
+
+## System documentation
+
+- [Architecture](docs/architecture.md): layers, design decisions, roles, evolution
+- [Workflows](docs/workflows.md): each n8n workflow, plus legacy and maintenance workflows
+- [Monday.com data model](docs/monday-data-model.md): forms, boards, columns, publish status
+- [Reliability](docs/reliability.md): what is in place, the Sept 24 incident, planned work
+
+## What this front-end code does
+
+**Today's Hours.** One card per STEM Center, with a status such as:
+
+`Open until 6:00 pm`
+
+`Closed today · Open 3:00 pm – 7:00 pm Monday`
+
+- Shows open, closed, alternate hours, or a label such as "by appointment" for days without set hours.
+- Uses each center's weekly hours to find the next opening time when a center is closed.
+- Applies closures and alternate hours, including multi-day closures, to every day they cover.
+- Links each card to that center's page.
+- Uses `America/New_York` for all times.
+
+**Where Today's Hours gets its data.** Weekly hours come from markup Webflow has already rendered on the page. Closures and alternate hours come from a public, read-only n8n feed, so a Webflow display or filter setting cannot hide a closure. If the feed cannot be reached, the script falls back to the schedule rows on the page.
+
+This is the only network request the script makes. The request carries no credentials, and the repository holds no Monday.com, Webflow, Google Calendar or n8n credentials. Every authenticated operation stays inside n8n.
+
+**Upcoming.** Events, closures and alternate hours, grouped by month:
+
+- Each item has a colored stripe. Events use their program color; several programs show as equal color bands; events with no program show blue. Closures are red, alternate hours amber.
+- Dates are combined into one readable line, including multi-day items. Items that have already ended are hidden.
+- Descriptions open and close with Read more.
+- Off-site events show the venue name, address and map link.
+- Registration links appear only when one is set.
+- Program tags show their short code, with the full name on hover. Tag names and colors come from the Monday.com Tags board by way of the page, so a new program needs no code change.
+
+**Events page.** A dedicated events and calendar page uses the same Upcoming list with a filter bar:
+
+- Filter by update type (All updates, Events, Closures), by location, and by program.
+- Choosing a program switches the view to Events. Choosing All updates or Closures clears the program.
+- The current filters are kept in the page URL, so a filtered view can be shared or bookmarked.
+
+**Calendar subscription.** The events page offers the shared events calendar for Google Calendar, Apple Calendar or Outlook.
+
+**Build stamp.** Each deploy writes its date into both files. The browser console shows `[schedule] build <date>`, so you can tell which version a page is running.
+
+## What the larger system supports
+
+These features are part of the launch but are handled by Monday.com, n8n or Webflow, not by this code:
+
+- Tags and venues managed on their own Monday.com boards, with new entries sent for review.
+- Event images copied into Webflow's own storage, and a volunteer-opportunity flag on events.
+- A shared Google Calendar for all events, with each STEM Center's calendar and tagged staff invited.
+- The upcoming-events list in the site footer (a Webflow collection list).
 
 ## Files
 
@@ -22,29 +94,6 @@ The two files are served from **schedule.nycfirst.org** (Cloudflare Pages).
 | `package.json`      | Pins Wrangler, the Cloudflare tool that uploads the files.              |
 | `package-lock.json` | Locks the exact Wrangler version so every deploy uses the same one.     |
 | `RELEASE_NOTES.md`  | What changed in each release, written for staff.                        |
-
-## What the script does
-
-**Today's Hours.** Each STEM Center card shows whether the center is open, closed, or running alternate hours:
-
-`Open until 6:00 pm`
-
-`Closed today · Open 3:00 pm – 7:00 pm Monday`
-
-The weekly hours come from the page. Closures and alternate hours come from a public, read-only n8n feed, so a website filter can never hide a closure. If the feed cannot be reached, the script falls back to the rows on the page. Each card links to that center's page. All times use `America/New_York`.
-
-**Upcoming.** Events, closures and alternate hours are grouped by month, each with a colored stripe:
-
-- Events use their program color from the Monday Tags board. Several programs show as bands; no program shows blue.
-- Closures are red. Alternate hours are amber.
-
-Dates are combined into one readable line, including multi-day events. Descriptions open with Read more. Off-site events show the venue, address and map link. Registration links appear only when one is set. Tag colors and names come from Monday, so a new program needs no code change.
-
-**Events page filters.** Filter by type (All updates, Events, Closures), by location and by program. Choosing a program switches to Events. Filters are kept in the page link so a filtered view can be shared.
-
-**Subscribe links.** One line offers the events calendar in Google, Apple or Outlook.
-
-**Build stamp.** Each deploy writes its date into both files. The browser console shows `[schedule] build <date>`, so you can tell which version a page is running.
 
 ## Placing the blocks in Webflow
 
@@ -71,11 +120,9 @@ If the expected markup is not on a page, the script exits without an error.
 
 ## Setup (once per computer)
 
-Install the pinned version of Wrangler and log in to Cloudflare:
-
 ```bash
-npm install
-npx wrangler login
+npm install          # installs the pinned Wrangler version from package-lock.json
+npx wrangler login   # signs this computer in to Cloudflare
 ```
 
 ## Editing and deploying
@@ -89,9 +136,10 @@ Edit `schedule.js` or `schedule.css`, then run:
 The script:
 
 1. Stamps the build date into both files.
-2. Commits and pushes to GitHub.
-3. Uploads only `schedule.css` and `schedule.js` to Cloudflare Pages.
-4. Checks that schedule.nycfirst.org is serving the new files.
+2. Commits the project files and pushes to GitHub.
+3. Copies only `schedule.css` and `schedule.js` into a temporary `.cfbuild/` folder.
+4. Deploys that folder to Cloudflare Pages with Wrangler.
+5. Checks that schedule.nycfirst.org is serving the new files.
 
 If it reports `STALE`, the push and upload still succeeded. Wait a minute and run it again. Then hard-refresh the page.
 
