@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-25 15:19';
+var SCHEDULE_BUILD = '2026-09-25 15:21';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
@@ -691,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var loc = q.get('loc');
       if (loc && locs.some(function (l) { return l.key === loc; })) state.loc = loc;
       var prog = (q.get('program') || '').toUpperCase();
-      if (prog && programsPresent.indexOf(prog) > -1) state.prog = prog;
+      if (prog && programsPresent.indexOf(prog) > -1) { state.prog = prog; state.kind = 'event'; }
     }
 
     function apply() {
@@ -738,12 +738,19 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!hit) return;
       if (hit.classList.contains('sc-clear')) { reset(); return; }
       state.kind = hit.getAttribute('data-kind');
+      if (state.kind !== 'event') state.prog = '';
       apply();
     });
 
     noneClear.addEventListener('click', reset);
     locSel.addEventListener('change', function () { state.loc = locSel.value; apply(); });
-    progSel.addEventListener('change', function () { state.prog = progSel.value; apply(); });
+    // Picking a programme means "show me those events", so it moves the view to
+    // Events. Choosing All updates or Closures afterwards clears the programme.
+    progSel.addEventListener('change', function () {
+      state.prog = progSel.value;
+      if (state.prog) state.kind = 'event';
+      apply();
+    });
 
     window.addEventListener('popstate', function () {
       state.kind = 'all'; state.loc = ''; state.prog = '';
