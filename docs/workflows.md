@@ -1,6 +1,6 @@
 # Workflows
 
-The n8n workflows behind the STEM Center Schedule System, as configured at launch (Sept 25, 2026).
+The n8n workflows behind the NYC FIRST Schedule & Events System, as configured at launch (Sept 25, 2026).
 
 Webhook URLs, credentials and board identifiers are intentionally left out. Workflow exports are not stored in this repository.
 
@@ -41,6 +41,16 @@ Publishes an event to the website and calendars when its publish status changes,
    - **Google Calendar:** replace the event on the SC-All calendar, with center calendars and staff as attendees, and write the event ID back to Monday. Unpublish deletes the event and clears the stored ID.
 
 Some Monday reads and write-backs retry automatically on failure.
+
+**Event scope.** Events may be STEM Center events, school events, partner-site events, other off-site events, or organization-wide events. The STEM Center column holds the host center, or Org Wide; it also decides which calendars are invited.
+
+**Event location.** Each location field is resolved on its own, in this order:
+
+- **Venue name:** the linked Venue record, else the typed venue name.
+- **Address:** the linked Venue's address, else the typed address, else the host STEM Center's address from the Calendars board.
+- **Map link:** the linked Venue's map link, else a Google Maps link built from the typed address, else the STEM Center's map link.
+
+A typed venue name that does not match an existing Venues item (exact, case-insensitive) is added to the Venues board's pending review group with the typed address. The event is not linked to the new record automatically. The Google Calendar event's location is the resolved address.
 
 ### Monday Schedule Changes → Webflow CMS and GCal
 

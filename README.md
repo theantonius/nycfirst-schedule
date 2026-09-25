@@ -1,10 +1,12 @@
-# NYC FIRST STEM Center Schedule System
+# NYC FIRST Schedule & Events System
 
-A staff-managed system for publishing NYC FIRST STEM Center hours, closures, schedule changes and events to the website and Google Calendar.
+A staff-managed system for publishing NYC FIRST events, STEM Center hours, closures, and schedule changes to the website and Google Calendar.
+
+Events can take place at STEM Centers, schools, partner sites, or other off-site venues across New York City.
 
 Launched September 25, 2026.
 
-This repository contains the public front-end and deployment code for the larger system. The full system connects Monday.com, n8n, Webflow, Google Calendar and nycfirst.org.
+This repository contains the public front-end and deployment code for the larger system. The full system connects Monday.com, n8n, Webflow, Google Calendar and nycfirst.org. The n8n workflows and Monday.com configuration live in those services, not in this repository.
 
 ![Webflow CMS collection populated by n8n, next to the public events page it produces](docs/images/07-webflow-cms-output.png)
 
@@ -14,21 +16,23 @@ This repository contains the public front-end and deployment code for the larger
 
 The project started in November 2025 with a simple question: how can someone tell whether a STEM Center is actually open today?
 
-It developed into a system where staff can submit and manage schedule information in Monday.com and publish it to the places where people need it without separately maintaining Webflow and Google Calendar.
+It developed into a system where staff manage STEM Center schedules and organization-wide NYC FIRST events in Monday.com and publish them to the places where people need them, without separately maintaining Webflow and Google Calendar.
 
 The system now includes:
 
 - Monday.com forms and boards for events, closures, alternate hours and regular STEM Center hours
+- organization-wide event publishing for events at STEM Centers, schools, partner sites and other venues
+- reusable venue data: a Venues board in Monday.com holds venue names, addresses and map links that events can reference instead of re-entering them
 - a self-hosted NYC FIRST n8n instance, now also used by other staff for internal automation
 - seven documented production workflows for publishing, synchronization and live schedule feeds
 - automated publishing from Monday.com to Webflow
+- automated event publishing to Google Calendar, with shared and center-specific calendars
 - automated regular walk-in hours: changing a center's weekly hours in Monday.com updates its Card Holder Walk-in Hours on the STEM Centers page through n8n and Webflow
-- automated event publishing to Google Calendar
-- shared and center-specific calendars
-- Webflow CMS integration
+- closures and alternate hours
 - public Today's Hours and Upcoming Events interfaces
-- event filtering and calendar subscription
+- event filtering and calendar subscriptions
 - configuration boards for calendars, programs, colors and venues
+- Webflow CMS integration
 - Cloudflare Pages deployment for the front-end code
 
 ## How it works
@@ -74,27 +78,31 @@ This repository provides the browser-side presentation layer used for Today's Ho
 
 *The main Events workflow: Monday change → Webflow and Google Calendar → IDs written back to Monday.*
 
-## Staff workflow
+## Two operational paths
 
-A typical event moves through the system like this:
+The system has two related but separate paths: NYC FIRST events, and STEM Center scheduling.
+
+### NYC FIRST events
 
 ```text
-Submit event
+Staff submit or manage an event in Monday.com
     ↓
-Review in Monday.com
-    ↓
-Set Published
+Review, then set Published
     ↓
 n8n processes the event
     ├── Webflow
     └── Google Calendar
     ↓
-Webflow + Calendar IDs written back to Monday
+Webflow + Calendar IDs written back to Monday.com
+    ↓
+Upcoming Events, events page and calendars
     ↓
 Future edits update the existing records
 ```
 
-Staff do not need to edit the same event separately in Webflow or Google Calendar.
+An event may be at a STEM Center, at a school, at a partner site, at another off-site venue, or organization-wide. Staff do not need to edit the same event separately in Webflow or Google Calendar.
+
+Off-site locations are kept on a Venues board in Monday.com. An event can link a Venue record, and its name, address and map link are reused. If a venue is not listed yet, staff type its name and address on the event; the event still publishes, and the new venue is added to the Venues board for review.
 
 <p>
   <img src="docs/images/02-monday-event-form.png" alt="Monday.com Events Submission Form" width="300">
@@ -110,13 +118,9 @@ Staff do not need to edit the same event separately in Webflow or Google Calenda
 
 *Published events land on the shared calendar, alongside the center-specific calendars.*
 
-Closures and alternate hours follow a similar process for the website (they are not currently sent to Google Calendar) and are also exposed through a public read-only n8n feed so Today's Hours can reflect current schedule changes.
+### STEM Center scheduling
 
-![Schedule Changes board above the STEM Center Hours board](docs/images/04-monday-schedule-data.png)
-
-*Exceptions (top) and regular weekly hours (bottom) are maintained separately in Monday.com.*
-
-Regular weekly hours use a simpler path, with no form or publish step:
+Regular weekly hours use a simple path, with no form or publish step:
 
 ```text
 Edit regular hours in Monday.com
@@ -133,6 +137,21 @@ Changing one day's hours on the `STEM Center Hours` board updates that day's fie
 ![STEM Center Hours board in Monday.com above the matching Card Holder Walk-in Hours on nycfirst.org](docs/images/09-walk-in-hours.png)
 
 *Staff edit a center's weekly hours in Monday.com (top); n8n updates the Webflow item and the Card Holder Walk-in Hours on the STEM Centers page change (bottom).*
+
+Closures and alternate hours follow the publish process for the website (they are not currently sent to Google Calendar) and are also exposed through a public read-only n8n feed. Today's Hours combines them with the weekly hours:
+
+```text
+Weekly hours Webflow renders
+  + live closure / alternate-hours overrides (n8n feed)
+    ↓
+schedule.js
+    ↓
+Today's Hours: current open / closed status
+```
+
+![Schedule Changes board above the STEM Center Hours board](docs/images/04-monday-schedule-data.png)
+
+*Exceptions (top) and regular weekly hours (bottom) are maintained separately in Monday.com.*
 
 ## Public interface
 
@@ -160,18 +179,20 @@ The front-end code in this repository provides:
 - Center-page links
 - New York timezone handling
 
-### Upcoming Events
+### NYC FIRST Events
 
-- Events, closures and alternate hours
-- Multi-day dates
+- Events at STEM Centers, schools, partner sites and other venues
+- Venue names and addresses
+- Map links for off-site events
 - Registration links
-- Off-site venues and map links
+- Multi-day events
 - Program tags and program-specific colors
 - Expandable descriptions
+- Closures and alternate hours in the same Upcoming list
 
 ### Events and calendar
 
-- Filters for update type, location and program
+- Filters for update type, location (STEM Centers and other locations) and program
 - Shareable filtered URLs
 - Google Calendar, Apple Calendar and Outlook subscription options
 
@@ -256,7 +277,7 @@ Private webhook URLs, board IDs, staff information and raw workflow exports are 
 
 The first prototype was created in November–December 2025 as a page answering "Is the STEM Center open?"
 
-Over the following ten months the system expanded to include weekly hours, live schedule changes, events, Google Calendar publishing, configuration boards, filtering and a dedicated front-end deployment.
+Over the following ten months, the project expanded from STEM Center scheduling into an organization-wide event and schedule publishing system, adding weekly hours, live schedule changes, off-site events, Google Calendar publishing, reusable venue and program data, filtering, and a dedicated front-end deployment.
 
 The production system launched September 25, 2026.
 

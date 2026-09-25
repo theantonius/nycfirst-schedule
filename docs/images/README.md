@@ -1,6 +1,6 @@
 # Screenshot plan
 
-Nine screenshots, ordered from the public result back into the infrastructure. Save each as PNG using the filename given. Check every image at full size before committing: blurred areas should be unreadable when zoomed in.
+Ten screenshots, ordered from the public result back into the infrastructure. Save each as PNG using the filename given. Check every image at full size before committing: blurred areas should be unreadable when zoomed in.
 
 Blur on every screenshot: staff names and avatars, email addresses, board/item/user IDs, webhook paths, credential names, account or workspace names, and anything that identifies a student.
 
@@ -12,7 +12,7 @@ Blur on every screenshot: staff names and avatars, email addresses, board/item/u
 
 ### 1. `01-public-site.png`
 
-- **Show:** Today's Hours cards. Optional second crop (`01b-events-page.png`): the events page with filters, program stripes and subscribe options.
+- **Show:** Today's Hours cards. Second crop (`01b-events-page.png`): the events page with filters, program stripes and subscribe options, including at least one off-site event with its venue name, address and map link visible.
 - **Crop:** browser tabs and chrome, unrelated site header/footer.
 - **Blur:** nothing, unless a card shows a staff name.
 - **Caption:** The public result: STEM Center hours, closures and events on nycfirst.org, maintained in Monday.com and published automatically.
@@ -28,7 +28,7 @@ Blur on every screenshot: staff names and avatars, email addresses, board/item/u
 
 ### 3. `03-monday-events-board.png`
 
-- **Show:** 4–6 event rows with event name, center, date, program, venue, publish status, Webflow ID and Calendar ID.
+- **Show:** 4–6 event rows with event name, center, date, program, venue, publish status, Webflow ID and Calendar ID. If possible include one STEM Center event, one school or other off-site event, and one partner-site or other venue event, with the Venue column visible.
 - **Crop:** the left sidebar, top navigation, and unrelated columns and groups.
 - **Blur:** the ID values (keep the column headers visible), Staff column, avatars.
 - **Caption:** Staff manage each event once, in Monday.com. Setting the publish status to Published sends it to the website and calendars, and n8n writes the resulting Webflow and calendar IDs back to the row.
@@ -81,3 +81,11 @@ Blur on every screenshot: staff names and avatars, email addresses, board/item/u
 - **Blur:** nothing; no personal data on either part.
 - **Caption: Staff edit a center's weekly hours in Monday.com (top); n8n updates the Webflow item and the Card Holder Walk-in Hours on the STEM Centers page change (bottom).
 - **Used in:** README.md, monday-data-model.md
+
+### 10. `10-monday-venues-board.png`
+
+- **Show:** the Venues board with several vetted venues (schools, partner sites) and the pending review group.
+- **Crop:** sidebar, navigation, unrelated columns.
+- **Blur:** any contact names, phone numbers or emails if the board has them; board and item IDs.
+- **Caption:** Schools and other event locations are reusable reference data managed centrally in Monday.com rather than hardcoded into individual events. New venues typed on an event arrive in the pending group for review.
+- **Used in:** monday-data-model.md, architecture.md

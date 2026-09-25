@@ -1,6 +1,6 @@
 # Architecture
 
-How the NYC FIRST STEM Center Schedule System fits together: where data is entered, where it lives, how it moves, and where it appears.
+How the NYC FIRST Schedule & Events System fits together: where data is entered, where it lives, how it moves, and where it appears.
 
 Items marked **⚠ Needs verification** have not been confirmed against the live configuration.
 
@@ -25,7 +25,7 @@ nycfirst.org ◄── schedule.js / schedule.css (this repo, served from schedu
 | Layer | Responsibility |
 | --- | --- |
 | Monday forms | Intake. Staff submit events and schedule changes without opening the boards. |
-| Monday.com boards | Source of truth for hours, schedule changes, events, and the configuration boards (Calendars, Tags, Venues). Publishing is controlled by a status column. |
+| Monday.com boards | Source of truth for STEM Center hours and schedule changes, NYC FIRST events, and shared configuration such as calendars, programs, tags and venues. Publishing is controlled by a status column. |
 | n8n | Listens for Monday changes, writes to Webflow and Google Calendar, writes the resulting IDs back to Monday, and serves public read-only feeds. |
 | Webflow CMS | Public content and page layer. Holds a copy of what Monday says; it is not edited as a source. |
 | Google Calendar | Distribution. One shared SC-All calendar, plus a calendar per STEM Center. |
@@ -75,6 +75,8 @@ These are the choices that shape how the system behaves.
 **Publishing is an explicit status.** A row can exist without appearing anywhere. Setting the publish status to Published pushes it out; setting it to Unpublished removes it from the live site and calendar.
 
 **One event, many calendars.** Each published event is created once, on the shared SC-All calendar. The relevant STEM Center calendars and tagged staff are added as attendees, so every calendar shows the same event record.
+
+**Events are not tied to STEM Centers.** An event may be at a STEM Center, a school, a partner site or another venue, or be organization-wide. Off-site locations are stored as reusable Venue records on the Venues board rather than recreated for every event. An event can link a Venue; if the venue is not listed yet, staff type its name and address, the event still publishes, and n8n adds the new venue to the Venues board for review. Venues are part of the Monday.com data model and the Events workflow, not a front-end feature; `schedule.js` only displays the venue name, address and map link that Webflow renders.
 
 **Configuration lives in Monday.** The Calendars board maps each center to its calendar and staff; the Tags board holds program names and colors; the Venues board holds off-site locations. Adding a center calendar, program or venue does not require editing a workflow. (Some mappings are still hardcoded in workflow code; see [reliability.md](reliability.md).)
 

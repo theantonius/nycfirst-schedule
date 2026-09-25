@@ -29,13 +29,14 @@ One row per event.
 | Column role | Notes |
 | --- | --- |
 | Name | Event title |
-| STEM Center | Host center, or Org Wide |
+| Event scope / STEM Center | Host STEM Center when there is one; Org Wide for organization-wide and off-site events. Also decides which calendars are invited |
 | Timeline | Start and end dates (older rows may use separate date columns) |
 | Start / end hour | Blank for all-day events |
 | Description, registration link | Shown on the site when set |
 | Program | Links to the Tags board; controls the color stripe and program filter |
 | Other tags | Free text; unknown tags are sent to Tags → pending |
-| Venue | Links to the Venues board; free-text venue name and address for new ones |
+| Venue | Reusable location linked from the Venues board (schools, partner sites, other venues); its name, address and map link take precedence |
+| Other venue name / address | Typed when the venue is not on the Venues board yet; a new name is sent to the Venues board for review |
 | Image | Copied into Webflow |
 | Volunteer opportunity | Checkbox |
 | Staff | Invited to the calendar event |
@@ -84,9 +85,11 @@ Reference data read by the workflows. Changing a row changes system behavior wit
 | --- | --- | --- |
 | Calendars | One row per center code, plus "All" and Org Wide: the center's Google Calendar, staff to invite, address | Configuration / reference data |
 | Tags | Program code, full name and color | New tags arrive in a pending group; review is manual |
-| Venues | Off-site venue names and addresses | New venues arrive in a pending group; review is manual |
+| Venues | Reusable event locations: name, address and map link | New venues typed on events arrive in a pending review group; review is manual |
 
 There is no automated approval step for Tags or Venues. The Events workflow only adds unknown entries to the pending group.
+
+**Venues** stores reusable locations such as schools, partner organizations and other event venues, with their address and map link, so staff do not need to recreate the same venue for every event. Typed venue names are matched exactly, so spelling variants can create near-duplicates in the pending group.
 
 Tag colors reach the page as `CODE=#hex=Name` entries, which `schedule.js` reads to color the program stripes.
 

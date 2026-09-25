@@ -1,6 +1,6 @@
 // Build stamp. deploy.sh rewrites the date on every deploy, so the console
 // tells you exactly which version a page is running.
-var SCHEDULE_BUILD = '2026-09-25 17:53';
+var SCHEDULE_BUILD = '2026-09-25 18:13';
 console.log('[schedule] build ' + SCHEDULE_BUILD);
 
 // Centre naming lives at the top level because BOTH DOMContentLoaded blocks below
