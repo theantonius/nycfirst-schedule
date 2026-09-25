@@ -1,4 +1,4 @@
-/* schedule build: 2026-09-25 14:23 */
+/* schedule build: 2026-09-25 14:26 */
 /* keep the raw Webflow output out of sight */
 .hours-data, .row-center, .row-date, .row-enddate, .row-programs, .row-program, .row-tagcolors, .row-host, .row-location, .row-maplink { display:none; }
 .month-label { display:none; }
@@ -243,12 +243,12 @@
 @media (max-width:991px) { .sc-teaser { max-width:none; margin-left:16px; margin-right:16px; } }
 
 /* Home page cards used to change width on Read more / Show less — the same
-   shrink-to-fit bug the events page had (see .sc-filters above). The panel sits
-   in a centred column, so with no width of its own it sized to its widest
-   visible line, and opening a description widened it. Claim the column
-   explicitly: full width, capped at the card column (680) plus panel padding. */
-.sc-teaser .sc-panel,
-.sc-teaser .upcoming-wrapper {
+   shrink-to-fit bug the events page had (see .sc-filters above). The home
+   panel (.lead-2.sc-panel) sits in .events-section, a column flex container
+   with align-items:center, so it sized to its widest visible line and opening
+   a description widened it. Claim the column explicitly: full width, capped at
+   the card column (680) plus panel padding. */
+.events-section > .sc-panel {
   align-self:stretch;
   width:100%;
   max-width:728px;
@@ -256,8 +256,9 @@
   margin-right:auto;
   box-sizing:border-box;
 }
-.sc-teaser .upcoming-wrapper { max-width:none; }
-.sc-teaser .month-stack { width:100%; max-width:none; }
+.events-section > .sc-panel > .upcoming-wrapper { align-self:stretch; width:100%; }
+.events-section .month-stack { width:100%; max-width:none; }
+@media (max-width:767px) { .events-section > .sc-panel { width:calc(100% - 32px); } }
 
 /* ============================================================
    Program tags. Every colour comes from the Monday Tags board by way of
