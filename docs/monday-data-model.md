@@ -72,7 +72,9 @@ One row per center. The row name is the center's short code.
 | Monday … Sunday | Regular hours as text; blank means closed |
 | Webflow Item ID | System field linking the row to its Webflow item |
 
-Managed by publishers. Editing a day's hours updates the matching Webflow item automatically.
+Managed by publishers. Editing a day's hours updates the matching Webflow item automatically. These fields populate the public "Card Holder Walk-in Hours" shown for each center on the STEM Centers page.
+
+![STEM Center Hours board and the matching Card Holder Walk-in Hours](images/09-walk-in-hours.png)
 
 ## Configuration boards
 

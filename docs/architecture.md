@@ -32,6 +32,24 @@ nycfirst.org ◄── schedule.js / schedule.css (this repo, served from schedu
 | Front end (this repo) | Presentation: Today's Hours, Upcoming, events-page filters, subscribe links. |
 | Cloudflare Pages | Hosts `schedule.js` and `schedule.css`. |
 
+## Publishing paths
+
+| Data | Path | Public output |
+| --- | --- | --- |
+| Events | Form or board → Published → n8n → Webflow and Google Calendar | Upcoming lists, events page, calendars |
+| Closures and alternate hours | Form or board → Published → n8n → Webflow; also served live by the SC Overrides feed | Upcoming lists, Today's Hours |
+| Regular weekly hours | STEM Center Hours board → n8n → Webflow STEM Center item | Card Holder Walk-in Hours on `/stem-centers`; baseline for Today's Hours |
+
+**Regular weekly hours** have their own path:
+
+- They are stored on the STEM Center Hours board in Monday.com, one row per center.
+- Changing one day's hours triggers n8n. There is no publish step.
+- n8n updates that day's field on the center's Webflow STEM Center item, found by the Webflow ID stored on the row.
+- Webflow renders those values as "Card Holder Walk-in Hours" on each center card at `/stem-centers`. `schedule.js` is not involved.
+- The same regular hours are the baseline schedule Today's Hours starts from.
+
+Closures and alternate hours are different: Today's Hours reads them live from the SC Overrides feed and applies them on top of that baseline.
+
 ## The n8n instance
 
 NYC FIRST runs a self-hosted n8n instance at n8n.nycfirst.org. It was launched for this project and is now used by multiple NYC FIRST staff for other internal automations. This system's workflows are one set among several on that instance.

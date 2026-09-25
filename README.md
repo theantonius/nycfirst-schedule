@@ -22,6 +22,7 @@ The system now includes:
 - a self-hosted NYC FIRST n8n instance, now also used by other staff for internal automation
 - seven documented production workflows for publishing, synchronization and live schedule feeds
 - automated publishing from Monday.com to Webflow
+- automated regular walk-in hours: changing a center's weekly hours in Monday.com updates its Card Holder Walk-in Hours on the STEM Centers page through n8n and Webflow
 - automated event publishing to Google Calendar
 - shared and center-specific calendars
 - Webflow CMS integration
@@ -115,7 +116,32 @@ Closures and alternate hours follow a similar process for the website (they are 
 
 *Exceptions (top) and regular weekly hours (bottom) are maintained separately in Monday.com.*
 
+Regular weekly hours use a simpler path, with no form or publish step:
+
+```text
+Edit regular hours in Monday.com
+    ↓
+n8n
+    ↓
+Webflow STEM Center item
+    ↓
+Card Holder Walk-in Hours on nycfirst.org
+```
+
+Changing one day's hours on the `STEM Center Hours` board updates that day's field on the center's Webflow item automatically. Staff never edit Webflow.
+
+![STEM Center Hours board in Monday.com above the matching Card Holder Walk-in Hours on nycfirst.org](docs/images/09-walk-in-hours.png)
+
+*Staff edit a center's weekly hours in Monday.com (top); n8n updates the Webflow item and the Card Holder Walk-in Hours on the STEM Centers page change (bottom).*
+
 ## Public interface
+
+The website shows STEM Center hours in two different places, produced by different parts of the system:
+
+| Display | Where | Produced by |
+| --- | --- | --- |
+| Card Holder Walk-in Hours | Each center card on `/stem-centers` | Monday.com → n8n → Webflow CMS. Rendered by Webflow, not by `schedule.js`. |
+| Today's Hours | Home page | `schedule.js`, combining the weekly hours Webflow renders with closures and alternate hours from the public n8n feed. |
 
 The front-end code in this repository provides:
 

@@ -1,6 +1,6 @@
 # Screenshot plan
 
-Eight screenshots, ordered from the public result back into the infrastructure. Save each as PNG using the filename given. Check every image at full size before committing: blurred areas should be unreadable when zoomed in.
+Nine screenshots, ordered from the public result back into the infrastructure. Save each as PNG using the filename given. Check every image at full size before committing: blurred areas should be unreadable when zoomed in.
 
 Blur on every screenshot: staff names and avatars, email addresses, board/item/user IDs, webhook paths, credential names, account or workspace names, and anything that identifies a student.
 
@@ -73,3 +73,11 @@ Blur on every screenshot: staff names and avatars, email addresses, board/item/u
 - **Blur:** the guest list, organizer and staff email addresses.
 - **Caption:** Each published event is created once on the shared SC-All calendar, with the relevant STEM Center calendars and staff invited.
 - **Used in:** architecture.md
+
+### 9. `09-walk-in-hours.png`
+
+- **Show:** a crop of the STEM Center Hours board (top) and several expanded Card Holder Walk-in Hours cards on `/stem-centers` (bottom), with the matching board rows outlined.
+- **Crop:** board navigation and non-hours columns; site header and the second row of cards.
+- **Blur:** nothing; no personal data on either part.
+- **Caption: Staff edit a center's weekly hours in Monday.com (top); n8n updates the Webflow item and the Card Holder Walk-in Hours on the STEM Centers page change (bottom).
+- **Used in:** README.md, monday-data-model.md

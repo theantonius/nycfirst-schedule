@@ -64,7 +64,7 @@ Keeps each STEM Center's regular weekly hours current on the website.
 2. Find the matching Webflow item by the ID stored on the row.
 3. Update that one day on the live Webflow item.
 
-Changes to other columns are ignored.
+Changes to other columns are ignored. The updated fields appear as the center's "Card Holder Walk-in Hours" on the public STEM Centers page.
 
 ### SC Overrides (public feed)
 
