@@ -1,4 +1,5 @@
 {
+  "private": true,
   "devDependencies": {
     "wrangler": "^4.133.0"
   }

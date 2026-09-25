@@ -3,7 +3,6 @@
 # Usage:  ./deploy.sh "what changed"
 set -euo pipefail
 
-REPO="theantonius/nycfirst-schedule"
 PROJECT="nycfirst-schedule"
 HOST="https://schedule.nycfirst.org"
 BUILD=".cfbuild"
@@ -35,15 +34,6 @@ rm -rf "$BUILD"
 mkdir -p "$BUILD"
 cp "${FILES[@]}" "$BUILD/"
 npx wrangler pages deploy "$BUILD" --project-name "$PROJECT" --commit-dirty=true
-
-# ---- jsDelivr: still the live path until Webflow points at $HOST ----
-# DELETE THIS BLOCK once both Webflow pages load from schedule.nycfirst.org.
-echo "waiting for jsDelivr to see the commit..."
-sleep 6
-for f in "${FILES[@]}"; do
-  curl -fsS "https://purge.jsdelivr.net/gh/${REPO}@main/${f}" >/dev/null && echo "purged  $f"
-done
-# ---------------------------------------------------------------------
 
 sleep 4
 

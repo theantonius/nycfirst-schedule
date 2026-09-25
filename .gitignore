@@ -1,3 +1,30 @@
-.cfbuild/
-.wrangler/
+# macOS
+.DS_Store
+
+# Node / npm
 node_modules/
+npm-debug.log*
+
+# Wrangler / Cloudflare local state and build output
+.wrangler/
+.cfbuild/
+.dev.vars
+.dev.vars.*
+
+# Local environment files
+.env
+.env.*
+
+# Editor backups and scratch copies
+*.bak
+*.bak-*
+*.orig
+*~
+*.swp
+
+# Logs
+*.log
+
+# Editors
+.vscode/
+.idea/
